@@ -13,9 +13,10 @@ export function Result({ a, age, trend }: { a: Assessment; age: number; trend?: 
         {adv.referral && <div className="mt-2 inline-block rounded-lg bg-berry px-2 py-1 text-xs font-bold text-white">Disarankan rujuk ke puskesmas</div>}
       </div>
       <div className="grid gap-4">
-        <div><ZGauge z={a.hfa} label="Tinggi menurut umur (TB/U)" /><div className="mt-2"><StatusChip s={a.sHfa} /></div></div>
+        <div><ZGauge z={a.hfa} label="Panjang/tinggi menurut umur (PB/U atau TB/U)" /><div className="mt-2"><StatusChip s={a.sHfa} /></div></div>
         <div><ZGauge z={a.wfa} label="Berat menurut umur (BB/U)" /><div className="mt-2"><StatusChip s={a.sWfa} /></div></div>
-        <div><ZGauge z={a.wfh} label="Berat menurut tinggi (BB/TB)" /><div className="mt-2"><StatusChip s={a.sWfh} /></div></div>
+        <div><ZGauge z={a.wfh} label="Berat menurut panjang/tinggi (BB/PB atau BB/TB)" /><div className="mt-2"><StatusChip s={a.sWfh} /></div></div>
+        <div><ZGauge z={a.bfa} label="Indeks massa tubuh menurut umur (IMT/U)" /><div className="mt-2"><StatusChip s={a.sBfa} /></div></div>
       </div>
       <div>
         <div className="mb-2 text-sm font-bold text-mute">Yang bisa disampaikan ke orang tua</div>

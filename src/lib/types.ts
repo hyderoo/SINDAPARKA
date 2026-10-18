@@ -14,6 +14,7 @@ export interface Measurement {
   date: string; // YYYY-MM-DD
   weight: number;
   height: number;
+  lying?: boolean; // measured lying down (length) vs standing (height)
   note?: string;
   pending?: boolean; // saved on this device, not yet synced
 }

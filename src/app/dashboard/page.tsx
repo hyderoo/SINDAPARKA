@@ -72,7 +72,7 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-          <p className="mt-3 text-xs text-mute">Batang penuh = 40%. Garis acuan nasional 2024: target di bawah 14%.</p>
+          <p className="mt-3 text-xs text-mute">Batang penuh = 40%. Pembanding: prevalensi stunting nasional 19,8% (SSGI 2024), target nasional 14,2% pada 2029.</p>
         </div>
       </section>
 

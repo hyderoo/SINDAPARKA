@@ -8,7 +8,7 @@ SINDAPARKA started as a PHP/MySQL stunting diagnosis system for posyandu cadres 
 
 ## What it does
 
-- **WHO growth standards.** Height-for-age, weight-for-age and weight-for-length/height z-scores from the official WHO 2006 LMS tables (0 to 60 months). Classification uses the Indonesian cut-offs (Permenkes 2/2020).
+- **WHO growth standards.** Length/height-for-age, weight-for-age, weight-for-length/height and BMI-for-age z-scores from the official WHO 2006 LMS tables (0 to 60 months). Classification and category names follow Permenkes 2/2020 (Standar Antropometri Anak), including the 0.7 cm correction when length/height is measured in the non-standard position.
 - **Growth chart per child** with the WHO -3, -2, median, +2, +3 SD curves and the child's own points.
 - **Trend alert** when a child's height z-score drops 0.25 SD or more over the last four visits, even while still in the normal range.
 - **Plain-language advice** for each result, written so a cadre can explain it to parents, with a referral flag when needed.
@@ -37,7 +37,14 @@ npm run build
 - `src/lib/who.json` holds the WHO LMS tables, converted from the official expanded tables published by WHO.
 - Weight-based z-scores use the WHO tail adjustment beyond +-3 SD. Height-for-age does not.
 - Tests check that the median gives z = 0 and the published SD values give -3, -2, +2, +3.
-- The immunization list is a condensed basic schedule. Always check the child's KIA book.
+- The immunization list follows the routine infant and toddler schedule published by Kemenkes (ayosehat.kemkes.go.id, "Jadwal Pemberian Imunisasi Rutin Lengkap"). Always check the child's KIA book.
+- Vitamin A reminders: February and August, 6 to 59 months (Kemenkes, ayosehat.kemkes.go.id).
+
+## Sources for the rules
+
+- Permenkes No. 2 Tahun 2020 tentang Standar Antropometri Anak (enacted 2 Jan 2020): https://keslan.kemkes.go.id/unduhan/fileunduhan_1660187306_961415.pdf
+- WHO Child Growth Standards: https://www.who.int/tools/child-growth-standards
+- SSGI 2024 national stunting prevalence 19.8%, 2029 target 14.2%: https://kemkes.go.id/id/ssgi-2024-prevalensi-stunting-nasional-turun-menjadi-198
 
 ## Current limits
 

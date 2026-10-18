@@ -67,7 +67,7 @@ export default function Laporan() {
             </tbody>
           </table>
         </div>
-        <p className="mt-3 text-xs text-mute">Setiap anak dihitung sekali, dari pengukuran terakhirnya di bulan ini. Pendek = TB/U di bawah -2 SD. Klasifikasi mengikuti Permenkes 2/2020 dengan standar WHO 2006.</p>
+        <p className="mt-3 text-xs text-mute">Setiap anak dihitung sekali, dari pengukuran terakhirnya di bulan ini. Pendek = TB/U di bawah -2 SD. Klasifikasi mengikuti Permenkes 2/2020 tentang Standar Antropometri Anak (standar WHO 2006 untuk 0 sampai 60 bulan).</p>
       </section>
     </div>
   );

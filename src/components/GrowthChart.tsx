@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { curve, type Sex } from "@/lib/who";
+import { correctHeight, curve, type Sex } from "@/lib/who";
 import type { Point } from "@/lib/analytics";
 
 const PAD = { l: 40, r: 14, t: 14, b: 32 };
@@ -31,7 +31,7 @@ export function GrowthChart({ sex, pts }: { sex: Sex; pts: Point[] }) {
     const B = cs.find((c) => c.z === b)!.pts;
     return "M" + A.map((p) => `${x(p.x).toFixed(1)},${y(p.y).toFixed(1)}`).join("L") + "L" + [...B].reverse().map((p) => `${x(p.x).toFixed(1)},${y(p.y).toFixed(1)}`).join("L") + "Z";
   };
-  const val = (p: Point) => (ind === "hfa" ? p.m.height : p.m.weight);
+  const val = (p: Point) => (ind === "hfa" ? correctHeight(p.age, p.m.height, p.m.lying ?? p.age <= 24) : p.m.weight);
   const step = ind === "hfa" ? 10 : 4;
   const ticks: number[] = [];
   for (let v = yMin; v <= yMax; v += step) ticks.push(v);

@@ -72,9 +72,9 @@ export default function Detail() {
           ))}
           {rem.length === 0 && <li className="text-mute">Tidak ada jadwal dekat.</li>}
         </ul>
-        <details className="mt-3 text-sm text-mute"><summary className="min-h-11 cursor-pointer font-bold">Ringkasan jadwal imunisasi dasar</summary>
+        <details className="mt-3 text-sm text-mute"><summary className="min-h-11 cursor-pointer font-bold">Jadwal imunisasi rutin bayi dan baduta (Kemenkes)</summary>
           <ul className="mt-2 space-y-1">{VACCINES.map((v) => <li key={v.month}>Usia {v.month} bln: {v.name}</li>)}</ul>
-          <p className="mt-2 text-xs">Ringkasan saja. Cek buku KIA dan arahan bidan untuk jadwal anak ini.</p>
+          <p className="mt-2 text-xs">Sumber: ayosehat.kemkes.go.id. Cek buku KIA dan arahan bidan untuk jadwal anak ini.</p>
         </details>
       </section>
     </div>

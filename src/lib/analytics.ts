@@ -13,7 +13,7 @@ export function series(child: Child, ms: Measurement[]): Point[] {
     .sort((a, b) => a.date.localeCompare(b.date))
     .map((m) => {
       const age = ageInMonths(child.birth, m.date);
-      return { m, age, a: assess(child.sex, age, m.weight, m.height) };
+      return { m, age, a: assess(child.sex, age, m.weight, m.height, m.lying) };
     });
 }
 export type Trend = "falling" | "stable" | "rising";

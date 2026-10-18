@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assess, curve, statusHFA, statusWFH, z } from "../who";
+import { assess, correctHeight, curve, statusHFA, statusWFH, z } from "../who";
 import { ageInMonths, addMonths } from "../age";
 
 describe("WHO z-scores", () => {
@@ -25,6 +25,25 @@ describe("WHO z-scores", () => {
   it("returns null outside the table range", () => {
     expect(z("hfa", "L", 61, 100)).toBeNull();
     expect(z("wfh", "L", 20, 5, 30)).toBeNull();
+  });
+});
+
+describe("Permenkes 2/2020 measurement rules", () => {
+  it("corrects by 0.7 cm when the measuring position does not match the age", () => {
+    expect(correctHeight(12, 75, true)).toBe(75);
+    expect(correctHeight(12, 75, false)).toBe(75.7);
+    expect(correctHeight(30, 90, false)).toBe(90);
+    expect(correctHeight(30, 90, true)).toBe(89.3);
+  });
+  it("uses length tables up to and including 24 months, height tables after", () => {
+    // WHO boys 24 months: length (lying) median 87.8, height (standing) median 87.1
+    expect(Math.abs(z("hfa", "L", 24, 87.8161)!)).toBeLessThan(0.01);
+    expect(Math.abs(z("hfa", "L", 25, 87.9720)!)).toBeLessThan(0.01);
+  });
+  it("returns a BMI-for-age z-score for 0-60 months", () => {
+    const a = assess("P", 18, 10.5, 80);
+    expect(a.bfa).not.toBeNull();
+    expect(a.sBfa).not.toBeNull();
   });
 });
 

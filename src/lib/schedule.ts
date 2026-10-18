@@ -5,15 +5,17 @@ export interface Vaccine {
   month: number;
   name: string;
 }
-/** Condensed basic immunization schedule. Always check the child's KIA book. */
+/** Routine infant and toddler schedule as published by Kemenkes (ayosehat.kemkes.go.id, "Jadwal Pemberian Imunisasi Rutin Lengkap"). Always check the child's KIA book. */
 export const VACCINES: Vaccine[] = [
   { month: 0, name: "Hepatitis B (HB-0)" },
   { month: 1, name: "BCG dan Polio tetes 1" },
-  { month: 2, name: "DPT-HB-Hib 1 dan Polio 2" },
-  { month: 3, name: "DPT-HB-Hib 2 dan Polio 3" },
-  { month: 4, name: "DPT-HB-Hib 3, Polio 4 dan IPV" },
-  { month: 9, name: "Campak-Rubela" },
-  { month: 18, name: "DPT-HB-Hib lanjutan dan Campak-Rubela lanjutan" },
+  { month: 2, name: "DPT-HB-Hib 1, Polio tetes 2, PCV 1, Rotavirus 1" },
+  { month: 3, name: "DPT-HB-Hib 2, Polio tetes 3, PCV 2, Rotavirus 2" },
+  { month: 4, name: "DPT-HB-Hib 3, Polio tetes 4, Polio suntik (IPV) 1, Rotavirus 3" },
+  { month: 9, name: "Campak-Rubela 1 dan Polio suntik (IPV) 2" },
+  { month: 10, name: "Japanese Encephalitis (hanya wilayah endemis)" },
+  { month: 12, name: "PCV 3" },
+  { month: 18, name: "DPT-HB-Hib 4 dan Campak-Rubela 2" },
 ];
 
 export interface Reminder {
@@ -53,7 +55,7 @@ export function remindersFor(child: Child, ms: Measurement[], today: string): Re
     const y = t.getFullYear();
     const target = m <= 1 ? `${y}-02-01` : m <= 7 ? `${y}-08-01` : `${y + 1}-02-01`;
     const dl = daysBetween(today, target);
-    if (dl <= 45) out.push({ childId: child.id, kind: "vitamin", title: "Vitamin A bulan " + (target.slice(5, 7) === "02" ? "Februari" : "Agustus"), due: target, overdue: false, daysLeft: dl });
+    if (dl <= 45) out.push({ childId: child.id, kind: "vitamin", title: (age < 12 ? "Vitamin A biru (100.000 IU)" : "Vitamin A merah (200.000 IU)") + ", bulan " + (target.slice(5, 7) === "02" ? "Februari" : "Agustus"), due: target, overdue: false, daysLeft: dl });
   }
   return out;
 }

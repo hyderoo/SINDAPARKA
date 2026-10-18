@@ -23,6 +23,7 @@ function Form() {
   const [w, setW] = useState("");
   const [h, setH] = useState("");
   const [saved, setSaved] = useState(false);
+  const [posture, setPosture] = useState<"auto" | "lying" | "standing">("auto");
 
   const child = sc?.children.find((c) => c.id === childId);
   const eSex = isNew ? sex : child?.sex;
@@ -32,7 +33,8 @@ function Form() {
   const hn = parseFloat(h.replace(",", "."));
   const numsOk = Number.isFinite(wn) && Number.isFinite(hn);
   const warn = age != null && numsOk ? plausible(age, wn, hn) : null;
-  const a = useMemo(() => (eSex && age != null && numsOk && !warn ? assess(eSex, age, wn, hn) : null), [eSex, age, numsOk, warn, wn, hn]);
+  const lying = posture === "auto" ? (age != null ? age <= 24 : true) : posture === "lying";
+  const a = useMemo(() => (eSex && age != null && numsOk && !warn ? assess(eSex, age, wn, hn, lying) : null), [eSex, age, numsOk, warn, wn, hn, lying]);
   const matches = useMemo(() => (sc ? sc.children.filter((c) => c.name.toLowerCase().includes(q.toLowerCase())).slice(0, 6) : []), [sc, q]);
   if (!sc) return null;
 
@@ -41,7 +43,7 @@ function Form() {
     if (!a) return;
     let id = childId;
     if (isNew) id = actions.addChild({ name: name.trim(), sex, birth, posyandu: sc.s.role === "kader" ? sc.s.posyandu : POSYANDU[0], guardian: guardian.trim() || "-" }).id;
-    actions.addMeasurement({ childId: id, date, weight: wn, height: hn });
+    actions.addMeasurement({ childId: id, date, weight: wn, height: hn, lying });
     setSaved(true);
     setTimeout(() => router.push(`/anak/${id}`), 700);
   };
@@ -88,10 +90,19 @@ function Form() {
         <h2 className="pt-2 font-display text-xl font-semibold">2. Hasil ukur</h2>
         <div className="grid grid-cols-2 gap-3">
           <div><label className="label" htmlFor="bb">Berat (kg)</label><input id="bb" inputMode="decimal" className="field" placeholder="9,5" value={w} onChange={(e) => setW(e.target.value)} /></div>
-          <div><label className="label" htmlFor="tb">{age != null && age < 24 ? "Panjang (cm)" : "Tinggi (cm)"}</label><input id="tb" inputMode="decimal" className="field" placeholder="75,5" value={h} onChange={(e) => setH(e.target.value)} /></div>
+          <div><label className="label" htmlFor="tb">{age != null && age <= 24 ? "Panjang (cm)" : "Tinggi (cm)"}</label><input id="tb" inputMode="decimal" className="field" placeholder="75,5" value={h} onChange={(e) => setH(e.target.value)} /></div>
+        </div>
+        <div>
+          <span className="label">Cara ukur</span>
+          <div className="grid grid-cols-2 gap-2">
+            {([["lying", "Berbaring"], ["standing", "Berdiri"]] as const).map(([k, l]) => (
+              <button key={k} type="button" className={`btn ${(posture === "auto" ? (lying ? "lying" : "standing") : posture) === k ? "btn-primary" : "btn-ghost"}`} onClick={() => setPosture(k)}>{l}</button>
+            ))}
+          </div>
+          <p className="mt-1 text-xs text-mute">Standar: 0 sampai 24 bulan berbaring, di atas 24 bulan berdiri. Kalau cara ukur berbeda, hasil dikoreksi 0,7 cm sesuai Permenkes 2/2020.</p>
         </div>
         <div><label className="label" htmlFor="tg">Tanggal ukur</label><input id="tg" type="date" className="field" value={date} max={todayISO()} onChange={(e) => setDate(e.target.value)} /></div>
-        {age != null && <p className="text-sm text-mute">Usia saat diukur: <b className="text-ink">{fmtAge(age)}</b> ({age} bulan). {age < 24 ? "Di bawah 2 tahun diukur berbaring." : "2 tahun ke atas diukur berdiri."}</p>}
+        {age != null && <p className="text-sm text-mute">Usia saat diukur: <b className="text-ink">{fmtAge(age)}</b> ({age} bulan). </p>}
         {age != null && age > 60 && <p className="rounded-xl bg-berry-soft p-3 text-sm font-semibold text-berry">Usia di atas 60 bulan, di luar cakupan standar balita.</p>}
         {warn && <p className="rounded-xl bg-berry-soft p-3 text-sm font-semibold text-berry">{warn}</p>}
       </section>
