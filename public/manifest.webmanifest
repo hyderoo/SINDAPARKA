@@ -1,0 +1,10 @@
+{
+  "name": "SINDAPARKA",
+  "short_name": "SINDAPARKA",
+  "description": "Pemantauan pertumbuhan balita untuk kader posyandu",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#fbf6ec",
+  "theme_color": "#1f5f56",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
