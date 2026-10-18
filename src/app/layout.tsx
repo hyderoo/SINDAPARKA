@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Roboto } from "next/font/google";
 import "./globals.css";
 import { Shell } from "@/components/Shell";
 
-const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
+const inter = Roboto({ variable: "--font-inter", subsets: ["latin"], weight: ["400","500","700"] });
 
 export const metadata: Metadata = {
   title: "SINDAPARKA - Pemantauan stunting untuk kader posyandu",

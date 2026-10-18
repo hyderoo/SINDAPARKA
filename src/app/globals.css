@@ -17,7 +17,7 @@
   --color-sun-soft: #FEF3CD;
   --color-berry: #D93025;
   --color-berry-soft: #FCE4E2;
-  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: var(--font-inter), Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: var(--font-inter), system-ui, sans-serif;
 }
 
