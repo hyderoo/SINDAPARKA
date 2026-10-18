@@ -25,7 +25,7 @@ export function ZGauge({ z, label }: { z: number | null; label: string }) {
         <span className="text-[13px] font-bold text-mute">{label}</span>
         <span className="font-display text-xl font-semibold tabular-nums">{zfmt(z)}</span>
       </div>
-      <div className="relative h-3 rounded-full" style={{ background: "linear-gradient(90deg,#a8334c 0%,#a8334c 12.5%,#cf6a43 12.5%,#cf6a43 25%,#7fb59f 25%,#7fb59f 62.5%,#e2a93b 62.5%,#e2a93b 75%,#8a78c4 75%)" }} aria-hidden>
+      <div className="relative h-3 rounded-full" style={{ background: "linear-gradient(90deg,#D93025 0%,#D93025 12.5%,#E8710A 12.5%,#E8710A 25%,#34A853 25%,#34A853 62.5%,#F9AB00 62.5%,#F9AB00 75%,#8E6BD6 75%)" }} aria-hidden>
         <div className="absolute top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-ink bg-white shadow" style={{ left: `${pos}%` }} />
       </div>
       <div className="mt-1 flex justify-between text-[10px] font-semibold text-mute tabular-nums">

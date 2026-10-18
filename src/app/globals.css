@@ -1,22 +1,24 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-paper: #fbf6ec;
-  --color-card: #fffdf8;
-  --color-line: #e8dfcc;
-  --color-ink: #25302b;
-  --color-mute: #6b736c;
-  --color-leaf: #1f5f56;
-  --color-leaf-deep: #123f39;
-  --color-leaf-soft: #dcebe4;
-  --color-clay: #cf6a43;
-  --color-clay-soft: #f7e0d3;
-  --color-sun: #e2a93b;
-  --color-sun-soft: #f9ecc9;
-  --color-berry: #a8334c;
-  --color-berry-soft: #f4d9de;
-  --font-sans: var(--font-jakarta), system-ui, sans-serif;
-  --font-display: var(--font-fraunces), Georgia, serif;
+  --color-paper: #F4F6F9;
+  --color-ok: #1E8E3E;
+  --color-ok-soft: #E3F4E8;
+  --color-card: #FFFFFF;
+  --color-line: #E3E8EF;
+  --color-ink: #1F2937;
+  --color-mute: #5F6B7A;
+  --color-leaf: #0B63CE;
+  --color-leaf-deep: #094FA6;
+  --color-leaf-soft: #E6F0FD;
+  --color-clay: #E8710A;
+  --color-clay-soft: #FDEBD8;
+  --color-sun: #F9AB00;
+  --color-sun-soft: #FEF3CD;
+  --color-berry: #D93025;
+  --color-berry-soft: #FCE4E2;
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-inter), system-ui, sans-serif;
 }
 
 html {
@@ -26,22 +28,20 @@ html {
 body {
   color: var(--color-ink);
   font-family: var(--font-sans);
-  background:
-    radial-gradient(1200px 500px at 90% -10%, #f3e6c8 0%, transparent 60%),
-    var(--color-paper);
+  background: var(--color-paper);
   min-height: 100dvh;
   overflow-x: hidden;
 }
 .font-display {
-  font-family: var(--font-display);
-  font-variation-settings: "SOFT" 60, "WONK" 0;
-  letter-spacing: -0.01em;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.015em;
 }
 .card {
-  background: var(--color-card);
+  background: #fff;
   border: 1px solid var(--color-line);
-  border-radius: 20px;
-  box-shadow: 0 1px 0 #fff inset, 0 8px 24px -16px rgba(60, 45, 20, 0.25);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
 }
 .btn {
   display: inline-flex;
@@ -50,8 +50,8 @@ body {
   gap: 8px;
   min-height: 48px;
   padding: 0 20px;
-  border-radius: 14px;
-  font-weight: 700;
+  border-radius: 10px;
+  font-weight: 600;
   font-size: 15px;
   transition: transform 0.12s, background 0.15s;
 }
@@ -75,8 +75,8 @@ body {
 }
 .field {
   width: 100%;
-  min-height: 52px;
-  border-radius: 14px;
+  min-height: 48px;
+  border-radius: 10px;
   border: 1.5px solid var(--color-line);
   background: #fff;
   padding: 0 14px;
@@ -103,11 +103,11 @@ body {
   font-weight: 700;
   white-space: nowrap;
 }
-.chip-ok { background: var(--color-leaf-soft); color: var(--color-leaf-deep); }
-.chip-watch { background: var(--color-sun-soft); color: #7a5410; }
-.chip-moderate { background: var(--color-clay-soft); color: #8a3c1a; }
+.chip-ok { background: var(--color-ok-soft); color: #14622B; }
+.chip-watch { background: var(--color-sun-soft); color: #7A5B00; }
+.chip-moderate { background: var(--color-clay-soft); color: #9A4A06; }
 .chip-severe { background: var(--color-berry-soft); color: var(--color-berry); }
-.chip-high { background: #e6e0f3; color: #4a3a82; }
+.chip-high { background: #EADFF9; color: #5B3FA0; }
 
 @keyframes rise {
   from { opacity: 0; transform: translateY(8px); }

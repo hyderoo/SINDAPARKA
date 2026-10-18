@@ -47,7 +47,7 @@ export default function Anak() {
         {list.map((r) => (
           <li key={r.child.id}>
             <Link href={`/anak/${r.child.id}`} className="card flex min-h-[84px] items-center gap-3 p-4">
-              <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full font-display text-lg font-bold ${r.child.sex === "L" ? "bg-leaf-soft text-leaf-deep" : "bg-clay-soft text-[#8a3c1a]"}`}>{r.child.name[0]}</div>
+              <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full font-display text-lg font-bold ${r.child.sex === "L" ? "bg-leaf-soft text-leaf-deep" : "bg-clay-soft text-[#9A4A06]"}`}>{r.child.name[0]}</div>
               <div className="min-w-0 flex-1">
                 <div className="truncate font-bold">{r.child.name}</div>
                 <div className="text-xs text-mute">{fmtAge(ageInMonths(r.child.birth, today))} · {r.child.posyandu} · terakhir {r.last ? fmtDate(r.last.m.date) : "-"}</div>

@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { Shell } from "@/components/Shell";
 
-const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin"] });
-const fraunces = Fraunces({ variable: "--font-fraunces", subsets: ["latin"] });
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "SINDAPARKA - Pemantauan stunting untuk kader posyandu",
@@ -13,11 +12,11 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   icons: { icon: "/icon.svg", apple: "/icon.svg" },
 };
-export const viewport: Viewport = { themeColor: "#1f5f56", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#0B63CE", width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={`${jakarta.variable} ${fraunces.variable}`}>
+    <html lang="id" className={inter.variable}>
       <body>
         <Shell>{children}</Shell>
       </body>

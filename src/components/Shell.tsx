@@ -24,9 +24,9 @@ function Icon({ d }: { d: string }) {
 export function Logo({ size = 36 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 512 512" aria-hidden>
-      <rect width="512" height="512" rx="112" fill="#1f5f56" />
-      <path d="M150 380V250M256 380V170M362 380V210" stroke="#fbf6ec" strokeWidth="44" strokeLinecap="round" />
-      <circle cx="256" cy="116" r="30" fill="#e2a93b" />
+      <rect width="512" height="512" rx="112" fill="#0B63CE" />
+      <path d="M150 380V250M256 380V170M362 380V210" stroke="#F4F6F9" strokeWidth="44" strokeLinecap="round" />
+      <circle cx="256" cy="116" r="30" fill="#F9AB00" />
     </svg>
   );
 }
@@ -96,7 +96,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
-        <div className="no-print mx-4 mt-2 rounded-xl bg-sun-soft px-3 py-2 text-xs font-semibold text-[#7a5410] md:mx-8">{t(lang, "demo")}</div>
+        <div className="no-print mx-4 mt-2 rounded-xl bg-sun-soft px-3 py-2 text-xs font-semibold text-[#7A5B00] md:mx-8">{t(lang, "demo")}</div>
         <main className="px-4 pt-4 md:px-8 md:pt-6">{children}</main>
       </div>
 

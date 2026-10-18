@@ -4,7 +4,7 @@
   "description": "Pemantauan pertumbuhan balita untuk kader posyandu",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#fbf6ec",
-  "theme_color": "#1f5f56",
+  "background_color": "#F4F6F9",
+  "theme_color": "#0B63CE",
   "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
 }

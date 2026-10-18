@@ -5,7 +5,7 @@ import { StatusChip, ZGauge } from "./ui";
 
 export function Result({ a, age, trend }: { a: Assessment; age: number; trend?: Trend }) {
   const adv = adviceFor(a, age, trend);
-  const bg = adv.tone === "act" ? "bg-clay-soft" : adv.tone === "watch" ? "bg-sun-soft" : "bg-leaf-soft";
+  const bg = adv.tone === "act" ? "bg-clay-soft" : adv.tone === "watch" ? "bg-sun-soft" : "bg-ok-soft";
   return (
     <div className="space-y-4">
       <div className={`rounded-2xl p-4 ${bg}`}>

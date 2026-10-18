@@ -34,7 +34,7 @@ export default function Detail() {
         <section className="card min-w-0 p-5">
           <h2 className="mb-3 font-display text-xl font-semibold">Kurva pertumbuhan</h2>
           <GrowthChart sex={r.child.sex} pts={r.pts} />
-          {r.trend === "falling" && <p className="mt-3 rounded-xl bg-sun-soft p-3 text-sm font-semibold text-[#7a5410]">Kurva tinggi turun 0,25 SD atau lebih dalam 4 kunjungan terakhir.</p>}
+          {r.trend === "falling" && <p className="mt-3 rounded-xl bg-sun-soft p-3 text-sm font-semibold text-[#7A5B00]">Kurva tinggi turun 0,25 SD atau lebih dalam 4 kunjungan terakhir.</p>}
         </section>
         <section className="card min-w-0 p-5">
           <h2 className="mb-3 font-display text-xl font-semibold">Penilaian terakhir</h2>

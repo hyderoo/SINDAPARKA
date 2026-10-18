@@ -54,9 +54,9 @@ export default function Dashboard() {
               const h = (x.pct / maxT) * 100;
               return (
                 <g key={i}>
-                  <rect x={12 + i * 51} y={115 - h} width="34" height={h} rx="8" fill={i === 5 ? "#cf6a43" : "#1f5f56"} opacity={i === 5 ? 1 : 0.8} />
-                  <text x={29 + i * 51} y={108 - h} textAnchor="middle" fontSize="11" fontWeight="700" fill="#25302b">{x.pct.toFixed(0)}%</text>
-                  <text x={29 + i * 51} y={138} textAnchor="middle" fontSize="11" fill="#6b736c">{x.label}</text>
+                  <rect x={12 + i * 51} y={115 - h} width="34" height={h} rx="8" fill={i === 5 ? "#E8710A" : "#0B63CE"} opacity={i === 5 ? 1 : 0.8} />
+                  <text x={29 + i * 51} y={108 - h} textAnchor="middle" fontSize="11" fontWeight="700" fill="#1F2937">{x.pct.toFixed(0)}%</text>
+                  <text x={29 + i * 51} y={138} textAnchor="middle" fontSize="11" fill="#5F6B7A">{x.label}</text>
                 </g>
               );
             })}
@@ -68,7 +68,7 @@ export default function Dashboard() {
             {byPos.map((b) => (
               <div key={b.p}>
                 <div className="flex justify-between text-sm font-bold"><span>Posyandu {b.p}</span><span className="tabular-nums">{b.pct.toFixed(1).replace(".", ",")}% · {b.total} anak</span></div>
-                <div className="mt-1 h-3 overflow-hidden rounded-full bg-leaf-soft"><div className="h-full rounded-full" style={{ width: `${Math.min(100, b.pct * 2.5)}%`, background: b.pct >= 20 ? "#cf6a43" : "#1f5f56" }} /></div>
+                <div className="mt-1 h-3 overflow-hidden rounded-full bg-leaf-soft"><div className="h-full rounded-full" style={{ width: `${Math.min(100, b.pct * 2.5)}%`, background: b.pct >= 20 ? "#E8710A" : "#0B63CE" }} /></div>
               </div>
             ))}
           </div>
@@ -104,7 +104,7 @@ export default function Dashboard() {
 }
 
 function Stat({ label, value, sub, tone = "ok" }: { label: string; value: string; sub?: string; tone?: "ok" | "warn" | "bad" }) {
-  const c = tone === "bad" ? "text-clay" : tone === "warn" ? "text-[#a87a14]" : "text-leaf";
+  const c = tone === "bad" ? "text-clay" : tone === "warn" ? "text-[#9A6B00]" : "text-leaf";
   return (
     <div className="card rise p-4">
       <div className="text-xs font-bold text-mute">{label}</div>

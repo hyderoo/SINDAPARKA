@@ -52,27 +52,27 @@ export function GrowthChart({ sex, pts }: { sex: Sex; pts: Point[] }) {
         ))}
       </div>
       <div ref={box} className="w-full min-w-0 overflow-hidden"><svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="block" role="img" aria-label={`Grafik pertumbuhan ${ind === "hfa" ? "tinggi" : "berat"} dibanding kurva standar WHO`}>
-        <path d={band(-2, 2)} fill="#dcebe4" opacity="0.9" />
-        <path d={band(-3, -2)} fill="#f7e0d3" opacity="0.9" />
-        <path d={band(2, 3)} fill="#f9ecc9" opacity="0.9" />
+        <path d={band(-2, 2)} fill="#E3F4E8" opacity="1" />
+        <path d={band(-3, -2)} fill="#FDEBD8" opacity="0.9" />
+        <path d={band(2, 3)} fill="#FEF3CD" opacity="0.9" />
         {ticks.map((v) => (
           <g key={v}>
-            <line x1={PAD.l} x2={W - PAD.r} y1={y(v)} y2={y(v)} stroke="#e8dfcc" strokeDasharray="3 4" />
-            <text x={PAD.l - 8} y={y(v) + 4} textAnchor="end" fontSize="11" fill="#6b736c">{v}</text>
+            <line x1={PAD.l} x2={W - PAD.r} y1={y(v)} y2={y(v)} stroke="#E3E8EF" strokeDasharray="3 4" />
+            <text x={PAD.l - 8} y={y(v) + 4} textAnchor="end" fontSize="11" fill="#5F6B7A">{v}</text>
           </g>
         ))}
         {(W < 400 ? [0, 12, 24, 36, 48, 60] : [0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60]).map((m) => (
-          <text key={m} x={x(m)} y={H - 12} textAnchor="middle" fontSize="11" fill="#6b736c">{m}</text>
+          <text key={m} x={x(m)} y={H - 12} textAnchor="middle" fontSize="11" fill="#5F6B7A">{m}</text>
         ))}
         {cs.map((c) => (
           <g key={c.z}>
-            <path d={path(c)} fill="none" stroke={c.z === 0 ? "#1f5f56" : Math.abs(c.z) === 3 ? "#a8334c" : "#cf6a43"} strokeWidth={c.z === 0 ? 2 : 1.4} strokeDasharray={c.z === 0 ? undefined : "5 4"} />
-            <text x={W - PAD.r - 2} y={y(c.pts[60].y) - 4} textAnchor="end" fontSize="10" fontWeight="700" fill="#6b736c">{label[c.z]}</text>
+            <path d={path(c)} fill="none" stroke={c.z === 0 ? "#1E8E3E" : Math.abs(c.z) === 3 ? "#D93025" : "#E8710A"} strokeWidth={c.z === 0 ? 2 : 1.4} strokeDasharray={c.z === 0 ? undefined : "5 4"} />
+            <text x={W - PAD.r - 2} y={y(c.pts[60].y) - 4} textAnchor="end" fontSize="10" fontWeight="700" fill="#5F6B7A">{label[c.z]}</text>
           </g>
         ))}
-        {pts.length > 1 && <polyline points={pts.map((p) => `${x(p.age)},${y(val(p))}`).join(" ")} fill="none" stroke="#25302b" strokeWidth="2.5" strokeLinejoin="round" />}
+        {pts.length > 1 && <polyline points={pts.map((p) => `${x(p.age)},${y(val(p))}`).join(" ")} fill="none" stroke="#1F2937" strokeWidth="2.5" strokeLinejoin="round" />}
         {pts.map((p) => (
-          <circle key={p.m.id} cx={x(p.age)} cy={y(val(p))} r="5.5" fill="#25302b" stroke="#fffdf8" strokeWidth="2" />
+          <circle key={p.m.id} cx={x(p.age)} cy={y(val(p))} r="5.5" fill="#1F2937" stroke="#FFFFFF" strokeWidth="2" />
         ))}
       </svg></div>
       <p className="mt-1 text-xs text-mute">Pita hijau: rentang normal (-2 sampai +2 SD). Garis putus-putus: batas -3, -2, +2, +3 SD. Titik hitam: hasil pengukuran anak. Sumbu bawah: usia dalam bulan.</p>
