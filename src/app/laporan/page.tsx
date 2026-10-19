@@ -1,7 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
 import { useScope } from "@/lib/scope";
-import { POSYANDU } from "@/lib/seed";
 import { addMonths, fmtMonthYear, todayISO } from "@/lib/age";
 import { Logo } from "@/components/Shell";
 
@@ -12,7 +11,7 @@ export default function Laporan() {
   const [mon, setMon] = useState(months[0]);
   const data = useMemo(() => {
     if (!sc) return [];
-    const list = sc.s.role === "admin" ? POSYANDU : [sc.s.posyandu];
+    const list = sc.s.role !== "kader" ? sc.s.posyanduList.map((x) => x.name) : [sc.s.posyandu];
     return list.map((p) => {
       const kids = sc.rows.filter((r) => r.child.posyandu === p);
       // each child counted once, by their latest measurement inside the chosen month

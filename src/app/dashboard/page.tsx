@@ -2,9 +2,8 @@
 import Link from "next/link";
 import { useScope } from "@/lib/scope";
 import { prevalence, priority } from "@/lib/analytics";
-import { POSYANDU } from "@/lib/seed";
 import { StatusChip } from "@/components/ui";
-import { fmtAge, fmtMonthYear, todayISO, addMonths } from "@/lib/age";
+import { posLabel, fmtAge, fmtMonthYear, todayISO, addMonths } from "@/lib/age";
 import { t } from "@/lib/i18n";
 
 export default function Dashboard() {
@@ -15,7 +14,7 @@ export default function Dashboard() {
   const pv = prevalence(rows);
   const alerts = rows.filter((r) => priority(r) > 0).sort((a, b) => priority(b) - priority(a));
   const falling = rows.filter((r) => r.trend === "falling" && !r.last?.a.stunted).length;
-  const byPos = (s.role === "admin" ? POSYANDU : [s.posyandu]).map((p) => {
+  const byPos = (s.role !== "kader" ? s.posyanduList.map((x) => x.name) : [s.posyandu]).map((p) => {
     const rr = rows.filter((r) => r.child.posyandu === p);
     return { p, ...prevalence(rr), total: rr.length };
   });
@@ -35,13 +34,13 @@ export default function Dashboard() {
   return (
     <div className="space-y-5">
       <header className="rise">
-        <p className="text-sm font-bold text-mute">{t(lang, "hello")}, {s.role === "admin" ? "Admin" : `Kader ${s.posyandu}`}</p>
+        <p className="text-sm font-bold text-mute">{t(lang, "hello")}, {s.role === "admin" ? "Admin" : s.role === "nakes" ? "Tenaga kesehatan" : `Kader ${s.posyandu}`}</p>
         <h1 className="font-display text-3xl font-semibold md:text-4xl">Kondisi balita bulan ini</h1>
       </header>
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label={t(lang, "children")} value={String(rows.length)} />
-        <Stat label={t(lang, "stunting")} value={`${pv.pct.toFixed(1).replace(".", ",")}%`} tone={pv.pct >= 20 ? "bad" : "ok"} sub={`${pv.stunted} dari ${pv.n} anak`} />
+        <Stat label={t(lang, "stunting")} value={`${pv.pct.toFixed(1).replace(".", ",")}%`} tone={pv.pct >= 20 ? "bad" : "ok"} sub={pv.n < 10 ? `${pv.stunted} dari ${pv.n} anak. Terlalu sedikit untuk persentase yang berarti.` : `${pv.stunted} dari ${pv.n} anak`} />
         <Stat label="Sangat pendek" value={String(pv.severe)} tone={pv.severe ? "bad" : "ok"} sub="z-score di bawah -3" />
         <Stat label={t(lang, "falling")} value={String(falling)} tone={falling ? "warn" : "ok"} sub="tinggi turun 4 kunjungan terakhir" />
       </section>
@@ -63,11 +62,11 @@ export default function Dashboard() {
           </svg>
         </div>
         <div className="card p-5">
-          <h2 className="font-display text-xl font-semibold">{s.role === "admin" ? "Per posyandu" : "Posyandu Anda"}</h2>
+          <h2 className="font-display text-xl font-semibold">{s.role !== "kader" ? "Per posyandu" : "Posyandu Anda"}</h2>
           <div className="mt-3 space-y-3">
             {byPos.map((b) => (
               <div key={b.p}>
-                <div className="flex justify-between text-sm font-bold"><span>Posyandu {b.p}</span><span className="tabular-nums">{b.pct.toFixed(1).replace(".", ",")}% · {b.total} anak</span></div>
+                <div className="flex justify-between text-sm font-bold"><span>{posLabel(b.p)}</span><span className="tabular-nums">{b.pct.toFixed(1).replace(".", ",")}% · {b.total} anak</span></div>
                 <div className="mt-1 h-3 overflow-hidden rounded-full bg-leaf-soft"><div className="h-full rounded-full" style={{ width: `${Math.min(100, b.pct * 2.5)}%`, background: b.pct >= 20 ? "#E8710A" : "#0B63CE" }} /></div>
               </div>
             ))}
@@ -88,7 +87,7 @@ export default function Dashboard() {
               <Link href={`/anak/${r.child.id}`} className="flex min-h-16 flex-wrap items-center gap-x-3 gap-y-1 py-2">
                 <div className="min-w-0 basis-full sm:flex-1 sm:basis-0">
                   <div className="truncate font-bold">{r.child.name}</div>
-                  <div className="text-xs text-mute">{fmtAge(r.last!.age)} · Posyandu {r.child.posyandu}</div>
+                  <div className="text-xs text-mute">{fmtAge(r.last!.age)} · {posLabel(r.child.posyandu)}</div>
                 </div>
                 <div className="flex flex-wrap gap-1">
                   <StatusChip s={r.last!.a.sHfa} />

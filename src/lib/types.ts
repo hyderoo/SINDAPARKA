@@ -5,8 +5,10 @@ export interface Child {
   name: string;
   sex: Sex;
   birth: string; // YYYY-MM-DD
-  posyandu: string;
+  posyandu: string; // posyandu name (display)
+  posyanduId: string;
   guardian: string;
+  consentAt?: string | null;
 }
 export interface Measurement {
   id: string;
@@ -16,6 +18,24 @@ export interface Measurement {
   height: number;
   lying?: boolean; // measured lying down (length) vs standing (height)
   note?: string;
-  pending?: boolean; // saved on this device, not yet synced
 }
-export type Role = "kader" | "admin";
+export type Role = "kader" | "nakes" | "admin";
+export type AccountStatus = "pending" | "active" | "disabled";
+export interface Posyandu {
+  id: string;
+  name: string;
+  puskesmasId: string;
+}
+export interface Puskesmas {
+  id: string;
+  name: string;
+}
+export interface Profile {
+  id: string;
+  fullName: string;
+  role: Role;
+  status: AccountStatus;
+  puskesmasId: string | null;
+  posyanduId: string | null;
+  createdAt: string;
+}

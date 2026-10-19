@@ -37,18 +37,21 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const online = useOnline();
   const lang = s?.lang ?? "id";
-  const isLanding = path === "/";
+  const PUBLIC = ["/", "/masuk", "/daftar", "/lupa", "/atur-ulang", "/menunggu", "/privasi", "/metode"];
+  const isLanding = PUBLIC.includes(path);
 
   useEffect(() => {
     if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") navigator.serviceWorker.register("/sw.js").catch(() => {});
   }, []);
   useEffect(() => {
-    if (s && !s.role && !isLanding) router.replace("/");
+    if (!s || !s.ready || isLanding) return;
+    if (!s.userId) router.replace("/masuk");
+    else if (s.status !== "active") router.replace("/menunggu");
   }, [s, isLanding, router]);
 
   if (isLanding) return <>{children}</>;
-  if (!s || !s.role) return <div className="p-8 text-mute">Memuat...</div>;
-  const pending = s.measurements.filter((m) => m.pending).length;
+  if (!s || !s.ready || !s.userId || s.status !== "active") return <div className="p-8 text-mute">Memuat...</div>;
+  const nav = s.role === "admin" ? [...NAV, { href: "/admin", k: "nav_admin" as Key, icon: "M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z" }] : NAV;
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-[1240px]">
@@ -57,7 +60,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <Logo />
           <span className="font-display text-xl font-bold">SINDAPARKA</span>
         </Link>
-        {NAV.map((n) => {
+        {nav.map((n) => {
           const on = path.startsWith(n.href);
           return (
             <Link key={n.href} href={n.href} className={`flex min-h-12 items-center gap-3 rounded-xl px-3 font-bold ${on ? "bg-leaf text-white" : "text-ink hover:bg-leaf-soft"}`}>
@@ -68,8 +71,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
         })}
         <div className="mt-auto space-y-2 text-sm">
           <div className="rounded-xl bg-leaf-soft p-3 text-leaf-deep">
-            <div className="font-bold">{s.role === "admin" ? "Admin puskesmas" : `Kader ${s.posyandu}`}</div>
-            <button className="mt-1 underline" onClick={() => { actions.logout(); router.push("/"); }}>{t(lang, "logout")}</button>
+            <div className="font-bold">{s.fullName || s.email}</div>
+            <div className="text-xs">{s.role === "admin" ? "Admin" : s.role === "nakes" ? "Tenaga kesehatan" : `Kader ${s.posyandu}`}</div>
+            <button className="mt-1 underline" onClick={async () => { await actions.signOut(); router.push("/masuk"); }}>{t(lang, "logout")}</button>
           </div>
           <div className="flex gap-2">
             {(["id", "en"] as const).map((l) => (
@@ -80,23 +84,20 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="min-w-0 flex-1 pb-28 md:pb-10">
-        <div className="no-print flex items-center gap-2 px-4 pt-3 text-xs md:px-8">
+        <div className="no-print flex flex-wrap items-center gap-2 px-4 pt-3 text-xs md:px-8">
           <Link href="/dashboard" className="flex items-center gap-2 md:hidden"><Logo size={28} /><span className="font-display text-lg font-bold">SINDAPARKA</span></Link>
-          <div className="ml-auto flex items-center gap-2">
-            <span className={`chip ${online ? "chip-ok" : "chip-moderate"}`}>{online ? "Online" : t(lang, "offline")}</span>
-            {pending > 0 && (
-              <button disabled={!online} onClick={() => actions.syncPending()} className="chip chip-watch min-h-9 disabled:opacity-50">
-                {pending} {t(lang, "pending")} · {t(lang, "sync")}
-              </button>
-            )}
-            <div className="flex gap-1 md:hidden">
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+            {!online && <span className="chip chip-moderate">{t(lang, "offline")}</span>}
+            {s.role === "admin" && <Link href="/admin" className="chip chip-watch min-h-9 md:hidden">Admin</Link>}
+            <button className="chip min-h-9 border border-line md:hidden" onClick={async () => { await actions.signOut(); router.push("/masuk"); }}>{t(lang, "logout")}</button>
+            <div className="hidden gap-1">
               {(["id", "en"] as const).map((l) => (
                 <button key={l} onClick={() => actions.setLang(l)} className={`min-h-9 rounded-lg px-2 text-xs font-bold uppercase ${lang === l ? "bg-ink text-white" : "border border-line text-mute"}`}>{l}</button>
               ))}
             </div>
           </div>
         </div>
-        <div className="no-print mx-4 mt-2 rounded-xl bg-sun-soft px-3 py-2 text-xs font-semibold text-[#7A5B00] md:mx-8">{t(lang, "demo")}</div>
+        <div className="no-print mx-4 mt-2 text-[11px] text-mute md:mx-8">{t(lang, "demo")} <Link href="/metode" className="underline">Selengkapnya</Link></div>
         <main className="px-4 pt-4 md:px-8 md:pt-6">{children}</main>
       </div>
 

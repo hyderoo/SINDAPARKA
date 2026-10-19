@@ -1,18 +1,16 @@
 "use client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { actions, useStore } from "@/lib/store";
-import { POSYANDU } from "@/lib/seed";
+import { useEffect } from "react";
+import { useStore } from "@/lib/store";
 import { Logo } from "@/components/Shell";
 
 export default function Landing() {
   const router = useRouter();
   const s = useStore();
-  const [pos, setPos] = useState(POSYANDU[0]);
-  const go = (role: "kader" | "admin") => {
-    actions.login(role, pos);
-    router.push("/dashboard");
-  };
+  useEffect(() => {
+    if (s?.userId) router.replace(s.status === "active" ? "/dashboard" : "/menunggu");
+  }, [s?.userId, s?.status, router]);
   return (
     <main className="mx-auto grid min-h-dvh max-w-5xl items-center gap-10 px-5 py-10 md:grid-cols-[1.1fr_1fr]">
       <section className="rise">
@@ -29,24 +27,19 @@ export default function Landing() {
           Alat bantu kader posyandu: catat berat dan tinggi balita, hitung z-score WHO otomatis, dan dapat saran yang mudah dijelaskan ke orang tua.
         </p>
         <ul className="mt-6 grid gap-2 text-[15px] font-semibold">
-          {["Standar WHO 2006, klasifikasi sesuai Permenkes 2/2020", "Tetap jalan tanpa sinyal, simpan dulu sinkron belakangan", "Laporan bulanan siap cetak atau unduh Excel"].map((x) => (
+          {["Klasifikasi sesuai Permenkes 2/2020 dengan standar WHO 2006", "Kader hanya melihat anak di posyandunya", "Laporan bulanan siap cetak atau unduh Excel"].map((x) => (
             <li key={x} className="flex gap-2"><span className="text-leaf">✓</span>{x}</li>
           ))}
         </ul>
-        <p className="mt-6 max-w-md text-xs text-mute">Proyek tim bersama BKKBN untuk kader posyandu Parakan Kauman, Temanggung. Versi demo ini memakai data sintetis dan bukan alat diagnosis medis.</p>
+        <p className="mt-6 max-w-md text-xs text-mute">Proyek tim bersama BKKBN untuk kader posyandu Parakan Kauman, Temanggung. Ini alat bantu, bukan alat diagnosis medis.</p>
       </section>
 
       <section className="card rise p-6" style={{ animationDelay: "0.08s" }}>
-        <h2 className="font-display text-2xl font-semibold">Masuk ke demo</h2>
-        <p className="mt-1 text-sm text-mute">Pilih peran untuk mencoba. Tanpa akun, data hanya ada di perangkat ini.</p>
-        <label className="label mt-5" htmlFor="pos">Posyandu (untuk peran kader)</label>
-        <select id="pos" className="field" value={pos} onChange={(e) => setPos(e.target.value)}>
-          {POSYANDU.map((p) => <option key={p}>{p}</option>)}
-        </select>
-        <button className="btn btn-primary mt-4 w-full" onClick={() => go("kader")}>Masuk sebagai kader</button>
-        <button className="btn btn-ghost mt-3 w-full" onClick={() => go("admin")}>Masuk sebagai admin puskesmas</button>
-        {s && s.role && <button className="mt-3 w-full text-sm font-bold text-leaf underline" onClick={() => router.push("/dashboard")}>Lanjutkan sesi sebelumnya</button>}
-        <p className="mt-4 text-xs text-mute">Kader melihat data posyandunya. Admin melihat semua posyandu dan laporan gabungan.</p>
+        <h2 className="font-display text-2xl font-semibold">Mulai</h2>
+        <p className="mt-1 text-sm text-mute">Masuk dengan akun Anda. Akun baru perlu disetujui admin puskesmas.</p>
+        <Link href="/masuk" className="btn btn-primary mt-5 w-full">Masuk</Link>
+        <Link href="/daftar" className="btn btn-ghost mt-3 w-full">Daftar akun</Link>
+        <p className="mt-4 text-xs text-mute"><Link href="/privasi" className="underline">Privasi data anak</Link> · <Link href="/metode" className="underline">Cara hitung dan batasannya</Link></p>
       </section>
     </main>
   );

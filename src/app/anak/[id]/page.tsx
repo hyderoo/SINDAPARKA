@@ -6,7 +6,7 @@ import { actions } from "@/lib/store";
 import { Result } from "@/components/Result";
 import { GrowthChart } from "@/components/GrowthChart";
 import { StatusChip, zfmt } from "@/components/ui";
-import { ageInMonths, fmtAge, fmtDate, todayISO } from "@/lib/age";
+import { posLabel, ageInMonths, fmtAge, fmtDate, todayISO } from "@/lib/age";
 import { remindersFor, VACCINES } from "@/lib/schedule";
 
 export default function Detail() {
@@ -24,7 +24,7 @@ export default function Detail() {
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start">
         <div className="min-w-0 flex-1">
           <h1 className="font-display text-3xl font-semibold">{r.child.name}</h1>
-          <p className="text-sm text-mute">{r.child.sex === "L" ? "Laki-laki" : "Perempuan"} · lahir {fmtDate(r.child.birth)} · {fmtAge(ageNow)} · Posyandu {r.child.posyandu}</p>
+          <p className="text-sm text-mute">{r.child.sex === "L" ? "Laki-laki" : "Perempuan"} · lahir {fmtDate(r.child.birth)} · {fmtAge(ageNow)} · {posLabel(r.child.posyandu)}</p>
           <p className="text-sm text-mute">Orang tua: {r.child.guardian}</p>
         </div>
         <Link href={`/periksa?anak=${id}`} className="btn btn-primary w-full sm:w-auto">Catat penimbangan</Link>
@@ -51,7 +51,6 @@ export default function Detail() {
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="font-bold">{fmtDate(p.m.date)}</span>
                 <span className="text-xs text-mute">{fmtAge(p.age)}</span>
-                {p.m.pending && <span className="chip chip-watch">belum sinkron</span>}
                 <button className="ml-auto text-xs font-bold text-berry underline" onClick={() => { if (confirm("Hapus penimbangan ini?")) actions.deleteMeasurement(p.m.id); }}>Hapus</button>
               </div>
               <div className="text-sm tabular-nums">{p.m.weight.toString().replace(".", ",")} kg · {p.m.height.toString().replace(".", ",")} cm · z TB/U {zfmt(p.a.hfa)}</div>

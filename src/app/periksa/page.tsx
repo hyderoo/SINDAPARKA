@@ -3,7 +3,6 @@ import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useScope } from "@/lib/scope";
 import { actions } from "@/lib/store";
-import { POSYANDU } from "@/lib/seed";
 import { ageInMonths, fmtAge, todayISO } from "@/lib/age";
 import { assess, plausible, type Sex } from "@/lib/who";
 import { Result } from "@/components/Result";
@@ -23,6 +22,10 @@ function Form() {
   const [w, setW] = useState("");
   const [h, setH] = useState("");
   const [saved, setSaved] = useState(false);
+  const [consent, setConsent] = useState(false);
+  const [posId, setPosId] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
   const [posture, setPosture] = useState<"auto" | "lying" | "standing">("auto");
 
   const child = sc?.children.find((c) => c.id === childId);
@@ -38,12 +41,20 @@ function Form() {
   const matches = useMemo(() => (sc ? sc.children.filter((c) => c.name.toLowerCase().includes(q.toLowerCase())).slice(0, 6) : []), [sc, q]);
   if (!sc) return null;
 
-  const canSave = !!a && (isNew ? name.trim().length > 1 && birth && birth <= date : !!child);
-  const save = () => {
-    if (!a) return;
+  const ownPosId = sc.s.role === "kader" ? sc.s.posyanduId ?? "" : posId || sc.s.posyanduList[0]?.id || "";
+  const canSave = !!a && (isNew ? name.trim().length > 1 && !!birth && birth <= date && consent && !!ownPosId : !!child);
+  const save = async () => {
+    if (!a || busy) return;
+    setBusy(true);
+    setErr(null);
     let id = childId;
-    if (isNew) id = actions.addChild({ name: name.trim(), sex, birth, posyandu: sc.s.role === "kader" ? sc.s.posyandu : POSYANDU[0], guardian: guardian.trim() || "-" }).id;
-    actions.addMeasurement({ childId: id, date, weight: wn, height: hn, lying });
+    if (isNew) {
+      const r = await actions.addChild({ name: name.trim(), sex, birth, posyanduId: ownPosId, guardian: guardian.trim(), consentAt: todayISO() });
+      if (r.error || !r.id) { setErr(r.error ?? "Gagal menyimpan data anak."); setBusy(false); return; }
+      id = r.id;
+    }
+    const e = await actions.addMeasurement({ childId: id, date, weight: wn, height: hn, lying });
+    if (e) { setErr(e); setBusy(false); return; }
     setSaved(true);
     setTimeout(() => router.push(`/anak/${id}`), 700);
   };
@@ -84,6 +95,13 @@ function Form() {
             </div>
             <div><label className="label" htmlFor="lh">Tanggal lahir</label><input id="lh" type="date" className="field" value={birth} max={date} onChange={(e) => setBirth(e.target.value)} /></div>
             <div><label className="label" htmlFor="wl">Nama orang tua (opsional)</label><input id="wl" className="field" value={guardian} onChange={(e) => setGuardian(e.target.value)} /></div>
+            {sc.s.role !== "kader" && (
+              <div><label className="label" htmlFor="ps">Posyandu</label><select id="ps" className="field" value={ownPosId} onChange={(e) => setPosId(e.target.value)}>{sc.s.posyanduList.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
+            )}
+            <label className="flex items-start gap-3 rounded-xl border border-line bg-bg p-3 text-sm">
+              <input type="checkbox" className="mt-1 h-5 w-5 shrink-0" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+              <span>Orang tua atau wali sudah diberi tahu dan menyetujui data anak ini dicatat di SINDAPARKA. Tanggal persetujuan dicatat hari ini.</span>
+            </label>
           </div>
         )}
 
@@ -112,7 +130,8 @@ function Form() {
         {a && age != null ? (
           <>
             <Result a={a} age={age} />
-            <button className="btn btn-primary mt-5 w-full" disabled={!canSave || saved} onClick={save}>{saved ? "Tersimpan ✓" : "Simpan penimbangan"}</button>
+            <button className="btn btn-primary mt-5 w-full" disabled={!canSave || saved || busy} onClick={save}>{saved ? "Tersimpan ✓" : busy ? "Menyimpan..." : "Simpan penimbangan"}</button>
+            {err && <p role="alert" className="mt-3 rounded-xl bg-berry-soft p-3 text-sm font-semibold text-berry">{err}</p>}
           </>
         ) : (
           <p className="text-mute">Isi data anak, berat, dan tinggi. Hasil z-score muncul di sini otomatis.</p>

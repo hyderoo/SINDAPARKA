@@ -5,7 +5,6 @@ import { useScope } from "@/lib/scope";
 import { priority } from "@/lib/analytics";
 import { StatusChip } from "@/components/ui";
 import { fmtAge, fmtDate, todayISO, ageInMonths } from "@/lib/age";
-import { POSYANDU } from "@/lib/seed";
 
 type F = "all" | "stunted" | "falling" | "ok";
 export default function Anak() {
@@ -31,10 +30,10 @@ export default function Anak() {
       </div>
       <div className="grid gap-2 md:grid-cols-[1fr_auto]">
         <input className="field" placeholder="Cari nama anak" aria-label="Cari nama anak" value={q} onChange={(e) => setQ(e.target.value)} />
-        {sc.s.role === "admin" && (
+        {sc.s.role !== "kader" && (
           <select className="field md:w-52" aria-label="Posyandu" value={pos} onChange={(e) => setPos(e.target.value)}>
             <option value="all">Semua posyandu</option>
-            {POSYANDU.map((p) => <option key={p}>{p}</option>)}
+            {sc.s.posyanduList.map((p) => <option key={p.id}>{p.name}</option>)}
           </select>
         )}
       </div>

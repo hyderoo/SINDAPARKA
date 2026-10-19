@@ -51,3 +51,11 @@ npm run build
 - Demo mode stores data in `localStorage`. There is no server yet, so "sync" only clears the pending flag. A Supabase adapter is the next step.
 - Roles are a demo switch, not real authentication.
 - All names and measurements are generated. No real child data is in this repository.
+
+## Backend (Supabase)
+
+- Auth: email + password (register, login, reset). New accounts are `kader` + `pending` and see nothing until an admin approves them and assigns a posyandu.
+- Schema and Row Level Security: `supabase/migrations/*.sql`. No table is readable by `anon`. Kader see their posyandu, `nakes` see their puskesmas, `admin` sees all. Users cannot change their own role (trigger guard).
+- No real data or secrets live in this repository. The project URL and publishable key in `src/lib/supabase.ts` are public by design; never add a `service_role` key to this app.
+- Bootstrap the first admin after registering: `update public.profiles set role='admin', status='active' where id = (select id from auth.users where email = 'you@example.com');`
+- `scripts/crosscheck-sample.mts` generates test points used to compare z-scores with the WHO igrowup port `pygrowup`.

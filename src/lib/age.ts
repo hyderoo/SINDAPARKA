@@ -39,3 +39,6 @@ export function fmtAge(months: number): string {
 export function daysBetween(a: string, b: string): number {
   return Math.round((new Date(b + "T00:00:00").getTime() - new Date(a + "T00:00:00").getTime()) / 86400000);
 }
+
+/** "Melati 1" -> "Posyandu Melati 1"; keeps names that already start with "Posyandu". */
+export const posLabel = (n: string) => (/^posyandu\b/i.test(n) ? n : `Posyandu ${n}`);

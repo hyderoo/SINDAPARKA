@@ -8,7 +8,7 @@ const inter = Roboto({ variable: "--font-inter", subsets: ["latin"], weight: ["4
 export const metadata: Metadata = {
   title: "SINDAPARKA - Pemantauan stunting untuk kader posyandu",
   description:
-    "Catat penimbangan, hitung z-score WHO, dan pantau tren pertumbuhan balita di posyandu. Demo memakai data sintetis.",
+    "Catat penimbangan, hitung z-score WHO, dan pantau tren pertumbuhan balita di posyandu.",
   manifest: "/manifest.webmanifest",
   icons: { icon: "/icon.svg", apple: "/icon.svg" },
 };

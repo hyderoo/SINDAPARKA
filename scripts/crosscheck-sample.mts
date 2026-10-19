@@ -1,4 +1,4 @@
-import { z } from "../src/lib/who.ts";
+import { z } from "../src/lib/who";
 const out:any[]=[]; let s=12345; const r=()=>{s=(s*1664525+1013904223)%4294967296;return s/4294967296};
 for(let i=0;i<1500;i++){const sex=r()<.5?"L":"P";const age=Math.floor(r()*61);
  const h=Math.round((45+ (age*1.0+ r()*10) *1.0 + 0)*10)/10; const hh=Math.min(Math.max(h,45),120);
