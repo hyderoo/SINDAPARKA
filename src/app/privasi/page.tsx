@@ -15,14 +15,21 @@ export default function Privasi() {
       <h2 className="font-display text-xl font-semibold">Persetujuan</h2>
       <p>Anak baru hanya bisa didaftarkan setelah kader menyatakan orang tua atau wali sudah diberi tahu dan setuju. Tanggal pernyataan itu disimpan. Persetujuan tertulis tetap perlu disimpan oleh posyandu sesuai ketentuan pengendali data.</p>
       <h2 className="font-display text-xl font-semibold">Penyimpanan dan penghapusan</h2>
-      <p>Data disimpan di Supabase (database PostgreSQL) di wilayah Sydney, Australia. Penghapusan penimbangan bersifat soft delete dan tercatat. Perubahan data anak dan penimbangan dicatat di log audit. Kebijakan masa simpan dan permintaan penghapusan dari orang tua harus ditetapkan oleh pengendali data.</p>
-      <h2 className="font-display text-xl font-semibold">Yang belum diputuskan</h2>
-      <ul className="list-disc space-y-1 pl-5">
-        <li>Siapa pengendali data (BKKBN, puskesmas, atau posyandu) dan siapa kontak pelindungan data.</li>
-        <li>Dasar hukum dan formulir persetujuan resmi menurut UU 27/2022 (Pelindungan Data Pribadi), karena data kesehatan anak termasuk data pribadi yang bersifat spesifik.</li>
-        <li>Persetujuan transfer data ke luar Indonesia (server di Sydney), masa simpan, dan prosedur jika terjadi kebocoran.</li>
-        <li>Hubungan dengan sistem resmi Kemenkes (e-PPGBM, ASIK).</li>
-      </ul>
+      <p>Data disimpan di Supabase (database PostgreSQL) di wilayah Sydney, Australia, dengan koneksi terenkripsi. Penghapusan penimbangan bersifat soft delete dan tercatat. Perubahan data anak dan penimbangan dicatat di log audit. Kebijakan masa simpan dan permintaan penghapusan dari orang tua harus ditetapkan oleh pengendali data.</p>
+      <h2 className="font-display text-xl font-semibold">Siapa yang bertanggung jawab atas data</h2>
+      <p>SINDAPARKA disiapkan untuk program KKN di wilayah Parakan Kauman, Parakan, Temanggung. Pihak yang menentukan tujuan dan cara penggunaan data (pengendali data) kemungkinan besar puskesmas setempat atau Dinas Kesehatan kabupaten. Penetapan itu harus datang dari mereka, bukan dari pengembang. Pengembang aplikasi berperan menyiapkan dan menjalankan sistem atas nama pengendali (pemroses data) dan perlu perjanjian tertulis dengan pengendali sebelum data sungguhan dimasukkan.</p>
+      <h2 className="font-display text-xl font-semibold">Yang harus diputuskan puskesmas sebelum data anak sungguhan dimasukkan</h2>
+      <ol className="list-decimal space-y-1 pl-5">
+        <li>Siapa pengendali data (puskesmas atau Dinkes) dan siapa penanggung jawab serta kontak pelindungan data yang bisa dihubungi orang tua.</li>
+        <li>Persetujuan tertulis: formulir persetujuan orang tua atau wali yang resmi, siapa yang menyimpannya, dan bagaimana orang tua menarik persetujuan.</li>
+        <li>Perjanjian tertulis antara puskesmas dan pengembang tentang peran pemroses data, batas penggunaan, dan kewajiban saat terjadi kebocoran.</li>
+        <li>Persetujuan lokasi penyimpanan: data disimpan di Supabase wilayah Sydney, Australia (di luar Indonesia). Pengendali harus menyetujui ini atau meminta alternatif.</li>
+        <li>Masa simpan data dan cara penghapusan atau permintaan koreksi dari orang tua.</li>
+        <li>Siapa admin yang menyetujui akun kader dan tenaga kesehatan, siapa yang berhak melihat data tiap posyandu, dan kapan akun yang tidak lagi bertugas dinonaktifkan.</li>
+        <li>Hubungan dengan sistem resmi Kemenkes (e-PPGBM, ASIK): apakah SINDAPARKA boleh dipakai berdampingan, dan apakah data perlu diekspor ke sana.</li>
+        <li>Tinjauan hukum atas dasar pemrosesan menurut UU 27/2022 (Pelindungan Data Pribadi), karena data kesehatan anak termasuk data pribadi yang bersifat spesifik.</li>
+      </ol>
+      <p className="text-sm text-mute">Sampai butir di atas ditetapkan, gunakan hanya data contoh (berlabel DEMO).</p>
     </main>
   );
 }
