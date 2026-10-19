@@ -10,6 +10,7 @@ export default function Laporan() {
   const months = Array.from({ length: 6 }, (_, i) => addMonths(today, -i).slice(0, 7));
   const [mon, setMon] = useState(months[0]);
   const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
   if (!sc) return null;
   const rep = buildReport({
     rows: sc.rows,
@@ -29,6 +30,31 @@ export default function Laporan() {
   const xlsx = async () => {
     setBusy(true);
     try { download(await buildXlsx(rep), `laporan-sindaparka-${mon}.xlsx`); } finally { setBusy(false); }
+  };
+  // Paste-ready monthly recap for the puskesmas report or the kader group chat.
+  const recapText = () => {
+    const line = (d: (typeof rep.sums)[number]) =>
+      `- ${d.p}: ${d.terdaftar} terdaftar, ${d.hadir} diukur, ${d.pendek} pendek, ${d.sangat} sangat pendek, ${d.gizi} gizi kurang/buruk, ${d.lebih} gizi lebih`;
+    return [
+      `Rekap penimbangan balita - ${rep.periodLabel}`,
+      `Puskesmas: ${rep.puskesmas} · ${rep.posyanduScope}`,
+      "",
+      "Per posyandu:",
+      ...rep.sums.map(line),
+      `TOTAL: ${T.terdaftar} terdaftar, ${T.hadir} diukur, ${T.pendek + T.sangat} pendek+sangat pendek (${pct(T.pendek + T.sangat, T.hadir)}), ${T.gizi} gizi kurang/buruk, ${T.falling} kurva turun`,
+      "",
+      "Klasifikasi Permenkes 2/2020 (standar WHO 2006). " + NOTE_FORMAT,
+    ].join("\n");
+  };
+  const copyRecap = async () => {
+    const txt = recapText();
+    try { await navigator.clipboard.writeText(txt); }
+    catch {
+      const ta = document.getElementById("rekap") as HTMLTextAreaElement | null;
+      ta?.select(); document.execCommand("copy");
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
   };
   const register = async () => {
     setBusy(true);
@@ -87,6 +113,13 @@ export default function Laporan() {
         <p className="mt-3 text-xs text-mute">{NOTE_METHOD}</p>
         <p className="mt-2 text-xs text-mute">Unduhan Excel berisi dua lembar: Ringkasan dan Data anak (nama, umur, berat, tinggi, z-score, status). {NOTE_FORMAT}</p>
         <p className="mt-2 text-xs text-mute">Tombol &quot;Unduh register&quot; berisi semua anak terdaftar dengan pengukuran terakhirnya. {NOTE_REGISTER}</p>
+      </section>
+
+      <section className="card space-y-3 p-4 md:p-6 print:hidden">
+        <h2 className="font-display text-xl font-semibold">Rekap siap tempel</h2>
+        <p className="text-xs text-mute">Ringkasan bulan ini dalam bentuk teks, siap ditempel ke laporan puskesmas atau grup kader. Angka mengikuti tabel di atas.</p>
+        <textarea id="rekap" readOnly rows={8} className="field !h-auto w-full font-mono !text-xs" value={recapText()} onFocus={(e) => e.target.select()} aria-label="Teks rekap bulanan" />
+        <button className="btn btn-primary" onClick={copyRecap}>{copied ? "Tersalin ✓" : "Salin rekap"}</button>
       </section>
 
       <section className="card p-4 md:p-6 print:hidden">
