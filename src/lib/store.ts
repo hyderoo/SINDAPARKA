@@ -153,6 +153,7 @@ export const actions = {
       consent_at: c.consentAt, consent_recorded_by: s.userId,
     }).select("id").single();
     if (error) return { error: msg(error) };
+    await refresh(); // so the new child is in memory for the z-score snapshot
     return { id: data.id as string };
   },
   async addMeasurement(m: { childId: string; date: string; weight: number; height: number; lying: boolean; note?: string }): Promise<string | null> {
