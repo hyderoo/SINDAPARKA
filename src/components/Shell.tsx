@@ -4,7 +4,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { actions, useOnline, useStore } from "@/lib/store";
 import { t, type Key } from "@/lib/i18n";
+import { fmtDate } from "@/lib/age";
 import { LoadError, PageSkeleton } from "@/components/Skeleton";
+import { ConfirmProvider, useConfirm } from "@/components/Confirm";
 
 const NAV: { href: string; k: Key; icon: string; adminOnly?: boolean }[] = [
   { href: "/dashboard", k: "nav_dashboard", icon: "M3 12l9-8 9 8M5 10v10h14V10" },
@@ -39,6 +41,7 @@ export function Logo({ size = 36 }: { size?: number }) {
 function SyncBar() {
   const s = useStore();
   const online = useOnline();
+  const confirm = useConfirm();
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState(false);
   if (!s || !s.userId || s.queue.length === 0) return null;
@@ -64,7 +67,7 @@ function SyncBar() {
                     <b>{q.childName}</b>{q.isNewChild ? " (anak baru)" : ""} · {q.date} · {String(q.weight).replace(".", ",")} kg
                     {q.error && <span className="block text-xs font-semibold text-berry">{q.error}</span>}
                   </span>
-                  <button className="min-h-10 shrink-0 px-2 text-xs font-bold text-berry underline" onClick={() => { if (confirm("Hapus catatan yang belum terkirim ini dari perangkat?")) actions.removeQueued(q.id); }}>Hapus</button>
+                  <button className="min-h-10 shrink-0 px-2 text-xs font-bold text-berry underline" onClick={async () => { if (await confirm({ title: "Hapus catatan yang belum terkirim?", detail: `${q.childName} · ${fmtDate(q.date)} · ${String(q.weight).replace(".", ",")} kg`, body: "Catatan ini hanya tersimpan di perangkat ini dan belum terkirim ke server. Menghapusnya berarti data penimbangan ini hilang.", confirmLabel: "Hapus catatan", destructive: true })) actions.removeQueued(q.id); }}>Hapus</button>
                 </li>
               ))}
             </ul>
@@ -137,6 +140,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const nav = s.role === "admin" ? [...NAV, MAP, { href: "/admin", k: "nav_admin" as Key, icon: "M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z" }] : [...NAV, MAP];
 
   return (
+    <ConfirmProvider>
     <div className="mx-auto flex min-h-dvh max-w-[1240px]">
       <aside className="no-print sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-1 p-5 md:flex">
         <Link href="/dashboard" className="mb-6 flex flex-col items-start gap-2">
@@ -197,5 +201,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
     </div>
+    </ConfirmProvider>
   );
 }

@@ -6,6 +6,7 @@ import { buildBackupXlsx } from "@/lib/report";
 import { todayISO } from "@/lib/age";
 import type { AccountStatus, Posyandu, Profile, Role } from "@/lib/types";
 import { Msg } from "@/components/Auth";
+import { useConfirm } from "@/components/Confirm";
 
 function Row({ p, onSaved }: { p: Profile; onSaved: () => void }) {
   const s = useStore()!;
@@ -55,6 +56,7 @@ Candrarini 15 | Sekrikil/XV
 Candrarini 16 | Situk/XVI`;
 
 function BulkAdd({ pkId }: { pkId: string }) {
+  const confirm = useConfirm();
   const [txt, setTxt] = useState("");
   const [m, setM] = useState<string | null>(null);
   const items = txt.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => { const [n, d] = l.split("|"); return { name: n.trim(), dusun: (d ?? "").trim() }; });
@@ -65,7 +67,7 @@ function BulkAdd({ pkId }: { pkId: string }) {
       <textarea id="bulk" rows={8} className="field !h-auto w-full" value={txt} onChange={(e) => setTxt(e.target.value)} placeholder={"Nama posyandu | Dusun/RW"} />
       <div className="flex flex-wrap items-center gap-2">
         <button className="btn btn-ghost" onClick={() => setTxt(PARAKAN_KAUMAN)}>Isi daftar Desa Parakan Kauman (15)</button>
-        <button className="btn btn-ghost" disabled={!pkId || items.length === 0 || items.some((i) => i.name.length < 2)} onClick={async () => { if (!confirm(`Tambahkan ${items.length} posyandu?`)) return; setM((await actions.addPosyanduBulk(pkId, items)) ?? `${items.length} posyandu ditambahkan`); setTxt(""); }}>Tambahkan {items.length || ""}</button>
+        <button className="btn btn-ghost" disabled={!pkId || items.length === 0 || items.some((i) => i.name.length < 2)} onClick={async () => { if (!(await confirm({ title: `Tambahkan ${items.length} posyandu?`, detail: items.map((i) => i.name).join(", "), body: "Posyandu-posyandu ini ditambahkan ke puskesmas yang dipilih di atas.", confirmLabel: "Tambahkan" }))) return; setM((await actions.addPosyanduBulk(pkId, items)) ?? `${items.length} posyandu ditambahkan`); setTxt(""); }}>Tambahkan {items.length || ""}</button>
       </div>
       <p className="text-xs text-mute">Daftar Desa Parakan Kauman berasal dari data desa tahun 2022 yang diberikan tim. Periksa sebelum menyimpan. Jangan klik dua kali agar tidak terduplikat.</p>
       {m && <p className="text-sm font-semibold text-mute" role="status">{m}</p>}
@@ -123,6 +125,7 @@ function BackupButton() {
 }
 
 export default function Admin() {
+  const confirm = useConfirm();
   const s = useStore();
   const [list, setList] = useState<Profile[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -184,7 +187,7 @@ export default function Admin() {
           {demo ? (
             <>
               <p className="text-sm text-mute">Aplikasi masih berisi anak fiktif untuk uji coba. Hapus sebelum data anak yang sebenarnya dimasukkan. Yang dihapus: semua anak, pengukuran, imunisasi, dan puskesmas atau posyandu uji coba beserta catatan perubahannya. Akun pengguna tidak ikut dihapus. Tidak bisa dibatalkan.</p>
-              <button className="btn btn-ghost !border-berry text-berry" onClick={async () => { if (!confirm("Hapus semua data uji coba? Tindakan ini tidak bisa dibatalkan.")) return; setDemoMsg(await actions.deleteDemo()); setDemo(await actions.hasDemo()); }}>Hapus data uji coba</button>
+              <button className="btn btn-ghost !border-berry text-berry" onClick={async () => { if (!(await confirm({ title: "Hapus semua data uji coba?", body: "Semua anak, pengukuran, imunisasi, dan puskesmas atau posyandu uji coba dihapus permanen. Akun pengguna tidak ikut dihapus. Tindakan ini tidak bisa dibatalkan.", confirmLabel: "Hapus data uji coba", destructive: true }))) return; setDemoMsg(await actions.deleteDemo()); setDemo(await actions.hasDemo()); }}>Hapus data uji coba</button>
             </>
           ) : null}
           {demoMsg && <p className="text-sm font-semibold text-mute" role="status">{demoMsg}</p>}

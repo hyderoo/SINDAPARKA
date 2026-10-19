@@ -6,12 +6,14 @@ import { actions } from "@/lib/store";
 import { Result } from "@/components/Result";
 import { GrowthChart } from "@/components/GrowthChart";
 import { EmptyState, StatusChip, zfmt } from "@/components/ui";
+import { useConfirm } from "@/components/Confirm";
 import { posLabel, ageInMonths, fmtAge, fmtDate, todayISO } from "@/lib/age";
 import { dosesFor, optsFor, remindersFor } from "@/lib/schedule";
 import { useState } from "react";
 import type { Child, Immunization } from "@/lib/types";
 
 function Imunisasi({ child, endemic, items, today }: { child: Child; endemic: boolean; items: Immunization[]; today: string }) {
+  const confirm = useConfirm();
   const [open, setOpen] = useState<string | null>(null);
   const [date, setDate] = useState(today);
   const [err, setErr] = useState<string | null>(null);
@@ -46,7 +48,7 @@ function Imunisasi({ child, endemic, items, today }: { child: Child; endemic: bo
                   {err && <p role="alert" className="text-sm font-semibold text-berry">{err}</p>}
                   <div className="grid grid-cols-2 gap-2">
                     <button className="btn btn-primary" onClick={() => save(d.code)}>Simpan</button>
-                    {rec ? <button className="btn btn-ghost !text-berry" onClick={async () => { if (confirm("Hapus catatan imunisasi ini?")) { const e = await actions.removeImmunization(rec.id); if (e) setErr(e); else setOpen(null); } }}>Hapus</button> : <button className="btn btn-ghost" onClick={() => setOpen(null)}>Batal</button>}
+                    {rec ? <button className="btn btn-ghost !text-berry" onClick={async () => { if (await confirm({ title: `Hapus catatan ${d.name}?`, detail: `Diberikan ${fmtDate(rec.givenOn)}`, body: "Catatan imunisasi ini dihapus dari riwayat anak. Statusnya kembali menjadi belum dicatat.", confirmLabel: "Hapus catatan", destructive: true })) { const e = await actions.removeImmunization(rec.id); if (e) setErr(e); else setOpen(null); } }}>Hapus</button> : <button className="btn btn-ghost" onClick={() => setOpen(null)}>Batal</button>}
                   </div>
                 </div>
               )}
@@ -61,6 +63,7 @@ function Imunisasi({ child, endemic, items, today }: { child: Child; endemic: bo
 }
 
 export default function Detail() {
+  const confirm = useConfirm();
   const { id } = useParams<{ id: string }>();
   const sc = useScope();
   if (!sc) return null;
@@ -106,7 +109,7 @@ export default function Detail() {
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="font-bold">{fmtDate(p.m.date)}</span>
                 <span className="text-xs text-mute">{fmtAge(p.age)}</span>
-                <button className="ml-auto min-h-11 px-3 text-xs font-bold text-berry underline" onClick={() => { if (confirm("Hapus penimbangan ini?")) actions.deleteMeasurement(p.m.id); }}>Hapus</button>
+                <button className="ml-auto min-h-11 px-3 text-xs font-bold text-berry underline" onClick={async () => { if (await confirm({ title: "Hapus penimbangan ini?", detail: `${fmtDate(p.m.date)} · ${p.m.weight.toString().replace(".", ",")} kg · ${p.m.height.toString().replace(".", ",")} cm · z TB/U ${zfmt(p.a.hfa)}`, body: "Catatan penimbangan ini dihapus permanen dari riwayat anak dan tidak bisa dikembalikan.", confirmLabel: "Hapus penimbangan", destructive: true })) actions.deleteMeasurement(p.m.id); }}>Hapus</button>
               </div>
               <div className="text-sm tabular-nums">{p.m.weight.toString().replace(".", ",")} kg · {p.m.height.toString().replace(".", ",")} cm · z TB/U {zfmt(p.a.hfa)}</div>
               <div className="mt-1"><StatusChip s={p.a.sHfa} /></div>
