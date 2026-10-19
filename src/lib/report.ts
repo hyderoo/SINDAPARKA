@@ -1,4 +1,5 @@
 import type { Row } from "./analytics";
+import type { Child, Immunization, Measurement, Posyandu } from "./types";
 import { ageInMonths, fmtDate, fmtMonthYear, todayISO } from "./age";
 import type { Status } from "./who";
 
@@ -224,6 +225,47 @@ export async function buildRegisterXlsx(rows: Row[], meta: { puskesmas: string; 
     c.font = { size: 9, italic: i !== 3, bold: i === 3, color: { argb: i === 3 ? "FFB3261E" : MUTE } };
   });
   ws.headerFooter.oddFooter = "&LSINDAPARKA - RAHASIA&CHalaman &P dari &N&R&D";
+  const buf = await wb.xlsx.writeBuffer();
+  return new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+}
+
+/** Full data backup for admins: every child, measurement and immunization in scope, one sheet each. */
+export const NOTE_BACKUP = "Cadangan penuh data SINDAPARKA. " + "Simpan berkas ini baik-baik; ia berisi data pribadi anak.";
+
+export async function buildBackupXlsx(data: { children: Child[]; measurements: Measurement[]; immunizations: Immunization[]; posyandu: Posyandu[]; puskesmas: string }): Promise<Blob> {
+  const ExcelJS = (await import("exceljs")).default;
+  const wb = new ExcelJS.Workbook();
+  wb.creator = "SINDAPARKA";
+  const BLUE = "FF0B63CE", MUTE = "FF5F6B7A";
+  const head = (r: import("exceljs").Row) => r.eachCell((c) => { c.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 10 }; c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: BLUE } }; });
+  const nameOf = new Map(data.posyandu.map((p) => [p.id, p.name]));
+  const childOf = new Map(data.children.map((c) => [c.id, c.name]));
+
+  const info = wb.addWorksheet("Info");
+  info.columns = [{ width: 110 }];
+  info.getCell(1, 1).value = "CADANGAN DATA SINDAPARKA"; info.getCell(1, 1).font = { size: 16, bold: true, color: { argb: BLUE } };
+  info.getCell(2, 1).value = `Puskesmas: ${data.puskesmas} · Dibuat ${fmtDate(todayISO())} · ${data.children.length} anak, ${data.measurements.length} pengukuran, ${data.immunizations.length} imunisasi`;
+  info.getCell(3, 1).value = NOTE_BACKUP; info.getCell(3, 1).font = { size: 9, italic: true, color: { argb: MUTE } };
+  info.getCell(4, 1).value = NOTE_CONF; info.getCell(4, 1).font = { size: 9, bold: true, color: { argb: "FFB3261E" } };
+
+  const s1 = wb.addWorksheet("Anak", { views: [{ state: "frozen", ySplit: 1 }] });
+  s1.columns = ["ID", "Posyandu", "Nama", "JK", "Tanggal lahir", "Orang tua/wali", "Tanggal persetujuan"].map((h, i) => ({ header: h, width: [38, 22, 28, 5, 14, 26, 18][i] }));
+  head(s1.getRow(1));
+  data.children.forEach((c) => s1.addRow([c.id, nameOf.get(c.posyanduId) ?? c.posyandu, c.name, c.sex, utcDate(c.birth), c.guardian, c.consentAt ? utcDate(c.consentAt) : ""]));
+  s1.eachRow((r, n) => { if (n > 1) { r.getCell(5).numFmt = "dd/mm/yyyy"; r.getCell(7).numFmt = "dd/mm/yyyy"; } });
+
+  const s2 = wb.addWorksheet("Pengukuran", { views: [{ state: "frozen", ySplit: 1 }] });
+  s2.columns = ["ID anak", "Nama anak", "Tanggal ukur", "BB (kg)", "PB/TB (cm)", "Cara", "Catatan"].map((h, i) => ({ header: h, width: [38, 28, 13, 8, 10, 10, 30][i] }));
+  head(s2.getRow(1));
+  [...data.measurements].sort((a, b) => a.date.localeCompare(b.date)).forEach((m) => s2.addRow([m.childId, childOf.get(m.childId) ?? "?", utcDate(m.date), m.weight, m.height, m.lying ? "Berbaring" : "Berdiri", m.note ?? ""]));
+  s2.eachRow((r, n) => { if (n > 1) r.getCell(3).numFmt = "dd/mm/yyyy"; });
+
+  const s3 = wb.addWorksheet("Imunisasi", { views: [{ state: "frozen", ySplit: 1 }] });
+  s3.columns = ["ID anak", "Nama anak", "Vaksin", "Tanggal diberikan"].map((h, i) => ({ header: h, width: [38, 28, 20, 16][i] }));
+  head(s3.getRow(1));
+  data.immunizations.forEach((im) => s3.addRow([im.childId, childOf.get(im.childId) ?? "?", im.vaccine, utcDate(im.givenOn)]));
+  s3.eachRow((r, n) => { if (n > 1) r.getCell(4).numFmt = "dd/mm/yyyy"; });
+
   const buf = await wb.xlsx.writeBuffer();
   return new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
 }

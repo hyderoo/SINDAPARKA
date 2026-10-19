@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { actions, useStore } from "@/lib/store";
+import { buildBackupXlsx } from "@/lib/report";
+import { todayISO } from "@/lib/age";
 import type { AccountStatus, Posyandu, Profile, Role } from "@/lib/types";
 import { Msg } from "@/components/Auth";
 
@@ -95,6 +97,31 @@ function LocRow({ p }: { p: Posyandu }) {
   );
 }
 
+function BackupButton() {
+  const s = useStore()!;
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
+  const dl = async () => {
+    setBusy(true);
+    try {
+      const pk = s.puskesmasList.map((x) => x.name).join(", ") || "-";
+      const blob = await buildBackupXlsx({ children: s.children, measurements: s.measurements, immunizations: s.immunizations, posyandu: s.posyanduList, puskesmas: pk });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `cadangan-sindaparka-${todayISO()}.xlsx`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      setDone(true);
+    } finally { setBusy(false); }
+  };
+  return (
+    <div className="flex items-center gap-3">
+      <button className="btn btn-primary" disabled={busy} onClick={dl}>{busy ? "Menyiapkan..." : done ? "Unduh lagi" : "Unduh cadangan (Excel)"}</button>
+      {done && <span className="text-sm font-semibold text-mute" role="status">Tersimpan di unduhan perangkat.</span>}
+    </div>
+  );
+}
+
 export default function Admin() {
   const s = useStore();
   const [list, setList] = useState<Profile[] | null>(null);
@@ -140,6 +167,11 @@ export default function Admin() {
           </label>
         ))}
         <p className="text-sm text-mute">Terdaftar: {s.puskesmasList.length} puskesmas, {s.posyanduList.length} posyandu.</p>
+      </section>
+      <section className="card space-y-3 p-5">
+        <h2 className="font-display text-xl font-semibold">Cadangan data</h2>
+        <p className="text-sm text-mute">Unduh semua data anak, pengukuran, dan imunisasi sebagai satu berkas Excel. Simpan baik-baik: berkas berisi data pribadi anak.</p>
+        <BackupButton />
       </section>
       <section className="card space-y-3 p-5">
         <h2 className="font-display text-xl font-semibold">Lokasi posyandu</h2>
