@@ -70,7 +70,7 @@ export default function Laporan() {
           <div className="text-sm text-mute">{rep.periodLabel} · {rep.puskesmas} · {rep.posyanduScope}</div>
         </div>
         <p className="mb-1 text-xs text-mute md:hidden">Geser tabel ke samping untuk melihat semua kolom.</p>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tabel ringkasan bulanan, bisa digeser">
           <table className="w-full min-w-[640px] text-sm tabular-nums">
             <thead><tr className="border-b-2 border-line text-left text-xs text-mute">
               {["Posyandu", "Terdaftar", "Diukur", "Pendek", "Sangat pendek", "BB kurang", "Gizi kurang/buruk", "Gizi lebih", "% pendek"].map((h) => <th key={h} className="px-2 py-2 font-bold">{h}</th>)}
@@ -93,7 +93,7 @@ export default function Laporan() {
         <h2 className="font-display text-xl font-semibold">Tren bulanan per posyandu</h2>
         <p className="mt-1 text-xs text-mute">Persentase anak pendek (z-score TB/U di bawah -2) memakai pengukuran terakhir setiap anak sampai akhir bulan itu. Tanda · berarti kurang dari 10 anak terukur, terlalu sedikit untuk persentase yang berarti.</p>
         <p className="mb-1 mt-2 text-xs text-mute md:hidden">Geser tabel ke samping untuk melihat semua bulan.</p>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tabel tren bulanan per posyandu, bisa digeser">
           <table className="w-full min-w-[560px] text-sm tabular-nums">
             <thead><tr className="border-b-2 border-line text-left text-xs text-mute">
               <th className="px-2 py-2 font-bold">Posyandu</th>

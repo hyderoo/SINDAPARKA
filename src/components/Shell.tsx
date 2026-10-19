@@ -167,14 +167,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="min-w-0 flex-1 pb-28 md:pb-10">
-        <div className="no-print flex items-center gap-2 px-4 pt-3 text-xs md:justify-end md:px-8">
+        <header className="no-print flex items-center gap-2 px-4 pt-3 text-xs md:justify-end md:px-8">
           <Link href="/dashboard" className="flex min-h-11 min-w-0 items-center gap-2 md:hidden"><Logo size={26} /><span className="hidden font-display text-base font-bold min-[400px]:inline">SINDAPARKA</span></Link>
           <div className="ml-auto flex items-center gap-2">
             {!online && <span className="chip chip-moderate">{t(lang, "offline")}</span>}
             <AccountMenu />
           </div>
-        </div>
-        <Link href="/metode" className="no-print mx-4 mt-1 flex min-h-11 items-center text-[11px] leading-snug text-mute md:mx-8"><span>{t(lang, "demo")} <u>Selengkapnya</u></span></Link>
+        </header>
         <main className="px-4 pt-4 md:px-8 md:pt-6">{s.error ? <LoadError message={s.error} onRetry={() => actions.refresh()} /> : !s.loaded ? <PageSkeleton /> : children}</main>
       </div>
       <SyncBar />

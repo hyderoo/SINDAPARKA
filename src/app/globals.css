@@ -106,7 +106,7 @@ body {
 .chip-ok { background: var(--color-ok-soft); color: #14622B; }
 .chip-watch { background: var(--color-sun-soft); color: #7A5B00; }
 .chip-moderate { background: var(--color-clay-soft); color: #9A4A06; }
-.chip-severe { background: var(--color-berry-soft); color: var(--color-berry); }
+.chip-severe { background: var(--color-berry-soft); color: #B3261E; }
 .chip-high { background: #EADFF9; color: #5B3FA0; }
 
 @keyframes rise {

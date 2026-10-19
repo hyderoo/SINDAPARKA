@@ -26,9 +26,9 @@ function Row({ p, onSaved }: { p: Profile; onSaved: () => void }) {
         <span className={`chip ${p.status === "active" ? "chip-ok" : p.status === "pending" ? "chip-watch" : "chip-severe"}`}>{p.status}</span>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
-        <div><label className="label">Peran</label><select className="field" value={role} disabled={me} onChange={(e) => setRole(e.target.value as Role)}><option value="kader">Kader</option><option value="nakes">Tenaga kesehatan</option><option value="admin">Admin</option></select></div>
-        <div><label className="label">Posyandu</label><select className="field" value={pos} onChange={(e) => setPos(e.target.value)}><option value="">-</option>{s.posyanduList.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></div>
-        <div><label className="label">Status</label><select className="field" value={status} disabled={me} onChange={(e) => setStatus(e.target.value as AccountStatus)}><option value="pending">Menunggu</option><option value="active">Aktif</option><option value="disabled">Nonaktif</option></select></div>
+        <div><label className="label">Peran</label><select className="field" aria-label={`Peran untuk ${p.fullName || "pengguna"}`} value={role} disabled={me} onChange={(e) => setRole(e.target.value as Role)}><option value="kader">Kader</option><option value="nakes">Tenaga kesehatan</option><option value="admin">Admin</option></select></div>
+        <div><label className="label">Posyandu</label><select className="field" aria-label={`Posyandu untuk ${p.fullName || "pengguna"}`} value={pos} onChange={(e) => setPos(e.target.value)}><option value="">-</option>{s.posyanduList.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></div>
+        <div><label className="label">Status</label><select className="field" aria-label={`Status untuk ${p.fullName || "pengguna"}`} value={status} disabled={me} onChange={(e) => setStatus(e.target.value as AccountStatus)}><option value="pending">Menunggu</option><option value="active">Aktif</option><option value="disabled">Nonaktif</option></select></div>
       </div>
       <div className="flex items-center gap-3"><button className="btn btn-primary" onClick={save}>Simpan</button>{msg && <span className="text-sm font-semibold text-mute">{msg}</span>}</div>
     </li>
@@ -123,12 +123,12 @@ export default function Admin() {
         <h2 className="font-display text-xl font-semibold">Puskesmas dan posyandu</h2>
         <p className="text-sm text-mute">Tambahkan dulu puskesmas, lalu posyandu di bawahnya. Gunakan nama resmi.</p>
         <div className="flex flex-wrap gap-2">
-          <input className="field min-w-[10rem] flex-1" placeholder="Nama puskesmas" value={pk} onChange={(e) => setPk(e.target.value)} />
+          <input className="field min-w-[10rem] flex-1" aria-label="Nama puskesmas baru" placeholder="Nama puskesmas" value={pk} onChange={(e) => setPk(e.target.value)} />
           <button className="btn btn-ghost" disabled={pk.trim().length < 2} onClick={async () => { setNote((await actions.addPuskesmas(pk)) ?? "Puskesmas ditambahkan"); setPk(""); }}>Tambah puskesmas</button>
         </div>
         <div className="flex flex-wrap gap-2">
-          <select className="field min-w-[10rem] flex-1" value={pkId || s.puskesmasList[0]?.id || ""} onChange={(e) => setPkId(e.target.value)}>{s.puskesmasList.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select>
-          <input className="field min-w-[10rem] flex-1" placeholder="Nama posyandu" value={po} onChange={(e) => setPo(e.target.value)} />
+          <select className="field min-w-[10rem] flex-1" aria-label="Pilih puskesmas untuk posyandu baru" value={pkId || s.puskesmasList[0]?.id || ""} onChange={(e) => setPkId(e.target.value)}>{s.puskesmasList.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select>
+          <input className="field min-w-[10rem] flex-1" aria-label="Nama posyandu baru" placeholder="Nama posyandu" value={po} onChange={(e) => setPo(e.target.value)} />
           <button className="btn btn-ghost" disabled={po.trim().length < 2 || !s.puskesmasList.length} onClick={async () => { setNote((await actions.addPosyandu(po, pkId || s.puskesmasList[0].id)) ?? "Posyandu ditambahkan"); setPo(""); }}>Tambah posyandu</button>
         </div>
         <BulkAdd pkId={pkId || s.puskesmasList[0]?.id || ""} />
