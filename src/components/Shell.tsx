@@ -89,8 +89,9 @@ function AccountMenu() {
   const router = useRouter();
   const path = usePathname();
   const [open, setOpen] = useState(false);
+  const [prevPath, setPrevPath] = useState(path);
+  if (path !== prevPath) { setPrevPath(path); setOpen(false); }
   const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => setOpen(false), [path]);
   useEffect(() => {
     if (!open) return;
     const down = (e: MouseEvent | TouchEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };

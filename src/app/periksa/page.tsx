@@ -40,7 +40,8 @@ function Form() {
     return () => io.disconnect();
   });
   const noKids = !!sc && sc.children.length === 0;
-  useEffect(() => { if (noKids) setIsNew(true); }, [noKids]);
+  const [prevNoKids, setPrevNoKids] = useState(noKids);
+  if (noKids !== prevNoKids) { setPrevNoKids(noKids); if (noKids) setIsNew(true); }
   const pick = (id: string) => { setChildId(id); setTimeout(() => document.getElementById("bb")?.focus(), 50); };
   const child = sc?.children.find((c) => c.id === childId);
   const eSex = isNew ? sex : child?.sex;
@@ -67,7 +68,7 @@ function Form() {
     else if (days > 45 && dW < -3) impl.push(`Berat turun ${f(dW)} kg dari penimbangan terakhir. Kalau benar, anak perlu diperiksa; kalau ragu, timbang ulang.`);
   }
 
-  const a = useMemo(() => (eSex && age != null && numsOk && !warn ? assess(eSex, age, wn, hn, lying) : null), [eSex, age, numsOk, warn, wn, hn, lying]);
+  const a = eSex && age != null && numsOk && !warn ? assess(eSex, age, wn, hn, lying) : null;
   const matches = useMemo(() => (sc ? sc.children.filter((c) => c.name.toLowerCase().includes(q.toLowerCase())).slice(0, 6) : []), [sc, q]);
   const dup = !isNew && child && sc ? sc.measurements.filter((m) => m.childId === child.id && m.date === date) : [];
   const dupSig = `${childId}|${date}`;

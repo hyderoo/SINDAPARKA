@@ -46,7 +46,7 @@ export default function Latihan() {
             <li>Aplikasi menghitung z-score dari standar WHO 2006 sesuai Permenkes 2/2020: TB/U (pendek/stunting), BB/U, BB/TB, dan IMT/U.</li>
             <li>TB/U di bawah -2 SD = Pendek; di bawah -3 SD = Sangat pendek. Keduanya ditandai untuk dirujuk ke puskesmas.</li>
             <li>KMS: catat titik berat badan setiap bulan. Garis berat anak harus mengikuti pita. Tanda N (naik) baik; T (tidak naik) perlu perhatian - aplikasi menampilkan tanda ini di riwayat anak.</li>
-            <li>Kurva tinggi yang turun 4 kunjungan berturut-turut ditandai "kurva turun" di aplikasi walau z-score belum pendek.</li>
+            <li>Kurva tinggi yang turun 4 kunjungan berturut-turut ditandai &quot;kurva turun&quot; di aplikasi walau z-score belum pendek.</li>
           </ul>
         </section>
 
@@ -54,7 +54,7 @@ export default function Latihan() {
           <H>4. Memakai aplikasi saat posyandu</H>
           <ul className="list-disc space-y-0.5 pl-4">
             <li>Buka Periksa, pilih anak, isi tanggal, berat, tinggi/panjang, dan cara ukur. Simpan.</li>
-            <li>Tidak ada sinyal? Catat tetap bisa; tersimpan di perangkat dan terkirim otomatis saat sinyal kembali (terlihat di kotak "menunggu dikirim").</li>
+            <li>Tidak ada sinyal? Catat tetap bisa; tersimpan di perangkat dan terkirim otomatis saat sinyal kembali (terlihat di kotak &quot;menunggu dikirim&quot;).</li>
             <li>Perangkat dipakai bersama? Pilih akun Anda di halaman masuk, ketik kata sandi sendiri. Keluar setelah selesai.</li>
             <li>Anak yang perlu dirujuk: buka profil anak, ketuk Surat rujukan, cetak untuk dibawa orang tua ke puskesmas.</li>
           </ul>
