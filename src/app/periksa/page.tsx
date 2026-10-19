@@ -3,8 +3,8 @@ import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useScope } from "@/lib/scope";
 import { actions } from "@/lib/store";
-import { ageInMonths, fmtAge, fmtDate, todayISO } from "@/lib/age";
-import { assess, plausible, type Sex } from "@/lib/who";
+import { ageInMonths, daysBetween, fmtAge, fmtDate, todayISO } from "@/lib/age";
+import { assess, correctHeight, plausible, type Sex } from "@/lib/who";
 import { Result } from "@/components/Result";
 
 function Form() {
@@ -21,7 +21,7 @@ function Form() {
   const [date, setDate] = useState(todayISO());
   const [w, setW] = useState("");
   const [h, setH] = useState("");
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState<"sent" | "queued" | false>(false);
   const [consent, setConsent] = useState(false);
   const [posId, setPosId] = useState("");
   const [busy, setBusy] = useState(false);
@@ -50,6 +50,22 @@ function Form() {
   const numsOk = Number.isFinite(wn) && Number.isFinite(hn);
   const warn = age != null && numsOk ? plausible(age, wn, hn) : null;
   const lying = posture === "auto" ? (age != null ? age <= 24 : true) : posture === "lying";
+  // Compare against the previous measurement of the same child: catch likely mis-measurements before saving.
+  const prevPt = !isNew && child && sc ? sc.rows.find((r) => r.child.id === child.id)?.last : undefined;
+  const impl: string[] = [];
+  if (prevPt && numsOk && age != null && !warn && date >= prevPt.m.date) {
+    const days = Math.max(1, daysBetween(prevPt.m.date, date));
+    const hPrev = correctHeight(prevPt.age, prevPt.m.height, prevPt.m.lying ?? prevPt.age <= 24);
+    const hNow = correctHeight(age, hn, lying);
+    const dH = Math.round((hNow - hPrev) * 10) / 10;
+    const dW = Math.round((wn - prevPt.m.weight) * 100) / 100;
+    const f = (v: number) => String(Math.abs(v)).replace(".", ",");
+    if (dH < -0.4) impl.push(`Tinggi menyusut ${f(dH)} cm dari penimbangan ${fmtDate(prevPt.m.date)}. Tinggi badan hampir tidak pernah turun; periksa ulang cara ukur dan alatnya.`);
+    else if (days <= 45 && dH > 8) impl.push(`Tinggi naik ${f(dH)} cm dalam ${days} hari, terlalu cepat untuk balita. Periksa ulang pengukuran.`);
+    if (days <= 45 && Math.abs(dW) > 2) impl.push(`Berat ${dW > 0 ? "naik" : "turun"} ${f(dW)} kg dalam ${days} hari. Perubahan sebesar ini jarang terjadi; timbang ulang sebelum disimpan.`);
+    else if (days > 45 && dW < -3) impl.push(`Berat turun ${f(dW)} kg dari penimbangan terakhir. Kalau benar, anak perlu diperiksa; kalau ragu, timbang ulang.`);
+  }
+
   const a = useMemo(() => (eSex && age != null && numsOk && !warn ? assess(eSex, age, wn, hn, lying) : null), [eSex, age, numsOk, warn, wn, hn, lying]);
   const matches = useMemo(() => (sc ? sc.children.filter((c) => c.name.toLowerCase().includes(q.toLowerCase())).slice(0, 6) : []), [sc, q]);
   const dup = !isNew && child && sc ? sc.measurements.filter((m) => m.childId === child.id && m.date === date) : [];
@@ -63,15 +79,46 @@ function Form() {
     if (dup.length > 0 && dupAckFor !== dupSig) { setDupAckFor(dupSig); return; }
     setBusy(true);
     setErr(null);
+    let offline = !navigator.onLine;
     let id = childId;
-    if (isNew) {
+    if (!offline && isNew) {
       const r = await actions.addChild({ name: name.trim(), sex, birth, posyanduId: ownPosId, guardian: guardian.trim(), consentAt: todayISO() });
-      if (r.error || !r.id) { setErr(r.error ?? "Gagal menyimpan data anak."); setBusy(false); return; }
-      id = r.id;
+      if (r.error || !r.id) {
+        if (r.error && (r.error.toLowerCase().includes("fetch") || r.error.toLowerCase().includes("koneksi"))) {
+          // fell offline mid-save: keep everything on the device instead of losing it
+          offline = true;
+          id = crypto.randomUUID();
+        } else { setErr(r.error ?? "Gagal menyimpan data anak."); setBusy(false); return; }
+      } else id = r.id;
+    } else if (offline && isNew) id = crypto.randomUUID();
+    if (offline) {
+      // offline path: queue locally, z-scores are computed when the entry is sent
+      actions.queueMeasurement({
+        childId: id, isNewChild: isNew, childName: isNew ? name.trim() : child!.name, childSex: eSex!, childBirth: eBirth!,
+        posyanduId: isNew ? ownPosId : child!.posyanduId, guardian: guardian.trim(), consentAt: todayISO(),
+        date, weight: wn, height: hn, lying,
+      });
+      setSaved("queued");
+      setBusy(false);
+      setTimeout(() => router.push("/dashboard"), 1200);
+      return;
     }
     const e = await actions.addMeasurement({ childId: id, date, weight: wn, height: hn, lying });
-    if (e) { setErr(e); setBusy(false); return; }
-    setSaved(true);
+    if (e) {
+      if (e.toLowerCase().includes("fetch") || e.toLowerCase().includes("koneksi")) {
+        actions.queueMeasurement({
+          childId: id, isNewChild: false, childName: child?.name ?? "", childSex: eSex!, childBirth: eBirth!,
+          posyanduId: child?.posyanduId ?? ownPosId, guardian: guardian.trim(), consentAt: todayISO(),
+          date, weight: wn, height: hn, lying,
+        });
+        setSaved("queued");
+        setBusy(false);
+        setTimeout(() => router.push("/dashboard"), 1200);
+        return;
+      }
+      setErr(e); setBusy(false); return;
+    }
+    setSaved("sent");
     setTimeout(() => router.push(`/anak/${id}`), 700);
   };
 
@@ -145,6 +192,9 @@ function Form() {
         )}
         {age != null && age > 60 && <p className="rounded-xl bg-berry-soft p-3 text-sm font-semibold text-berry">Usia di atas 60 bulan, di luar cakupan standar balita.</p>}
         {warn && <p className="rounded-xl bg-berry-soft p-3 text-sm font-semibold text-berry">{warn}</p>}
+        {impl.map((m) => (
+          <p key={m} role="alert" className="rounded-xl bg-[#FDF3E0] p-3 text-sm font-semibold text-[#9A6B00]">{m}</p>
+        ))}
       </section>
 
       <section ref={resRef} id="hasil" className="card scroll-mt-4 p-5">
@@ -152,7 +202,8 @@ function Form() {
         {a && age != null ? (
           <>
             <Result a={a} age={age} />
-            <button className="btn btn-primary mt-5 w-full" disabled={!canSave || saved || busy} onClick={save}>{saved ? "Tersimpan ✓" : busy ? "Menyimpan..." : dup.length > 0 && dupAckFor !== dupSig ? "Tetap simpan (pengukuran kedua)" : "Simpan penimbangan"}</button>
+            <button className="btn btn-primary mt-5 w-full" disabled={!canSave || !!saved || busy} onClick={save}>{saved === "sent" ? "Tersimpan ✓" : saved === "queued" ? "Disimpan di perangkat ✓" : busy ? "Menyimpan..." : dup.length > 0 && dupAckFor !== dupSig ? "Tetap simpan (pengukuran kedua)" : "Simpan penimbangan"}</button>
+            {saved === "queued" && <p role="status" className="mt-3 rounded-xl bg-[#FDF3E0] p-3 text-sm font-semibold text-[#9A6B00]">Tidak ada sinyal. Catatan tersimpan di perangkat ini dan terkirim otomatis begitu ada sinyal.</p>}
             {err && <p role="alert" className="mt-3 rounded-xl bg-berry-soft p-3 text-sm font-semibold text-berry">{err}</p>}
           </>
         ) : (
