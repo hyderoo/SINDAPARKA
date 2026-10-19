@@ -36,6 +36,7 @@ export default function Dashboard() {
       <header className="rise">
         <p className="text-sm font-bold text-mute">{t(lang, "hello")}, {s.role === "admin" ? "Admin" : s.role === "nakes" ? "Tenaga kesehatan" : `Kader ${s.posyandu}`}</p>
         <h1 className="font-display text-3xl font-semibold md:text-4xl">Kondisi balita bulan ini</h1>
+        <Link href="/peta" className="btn btn-ghost mt-2 md:hidden">Lihat peta posyandu</Link>
       </header>
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
