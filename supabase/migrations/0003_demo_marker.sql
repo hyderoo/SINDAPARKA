@@ -13,6 +13,7 @@ begin
   if public.me_role() is distinct from 'admin' then raise exception 'only an admin can delete sample data'; end if;
   delete from public.audit_log where row_id in (select id from public.measurements where is_demo or child_id in (select id from public.children where is_demo))
      or row_id in (select id from public.children where is_demo);
+  delete from public.audit_log where row_id in (select id from public.immunizations where child_id in (select id from public.children where is_demo));
   delete from public.immunizations where child_id in (select id from public.children where is_demo);
   delete from public.measurements where is_demo or child_id in (select id from public.children where is_demo);
   get diagnostics n_m = row_count;
