@@ -148,6 +148,9 @@ async function refresh() {
     if (!p) { patch({ ready: true, loading: false, userId: user.id, email: user.email ?? null, status: "pending", role: "kader" }); return; }
     const base = { ready: true, userId: user.id, email: user.email ?? null, fullName: p.full_name as string, role: p.role as Role, status: p.status as AccountStatus, posyanduId: p.posyandu_id as string | null };
     if (p.status !== "active") { patch({ ...base, loading: false, loaded: true, children: [], measurements: [], immunizations: [], posyanduList: [], puskesmasList: [] }); return; }
+    // Patch identity before the bulk fetch so a transient failure shows the retryable error
+    // state instead of bouncing the user back to /masuk (userId would still be null).
+    patch(base);
     const [pk0, pos, kids, ms, ims] = await withTimeout(Promise.all([
       fetchAll<{ id: string; name: string; endemic_vaccines: boolean }>("puskesmas", "id,name,endemic_vaccines", "name"),
       fetchAll<{ id: string; name: string; puskesmas_id: string; visit_day: number | null; latitude: number | null; longitude: number | null; dusun: string | null; is_demo: boolean | null }>("posyandu", "id,name,puskesmas_id,visit_day,latitude,longitude,dusun,is_demo", "name"),
