@@ -67,6 +67,12 @@ export default function Admin() {
           <button className="btn btn-ghost" disabled={po.trim().length < 2 || !s.puskesmasList.length} onClick={async () => { setNote((await actions.addPosyandu(po, pkId || s.puskesmasList[0].id)) ?? "Posyandu ditambahkan"); setPo(""); }}>Tambah posyandu</button>
         </div>
         {note && <p className="text-sm font-semibold text-mute">{note}</p>}
+        {s.puskesmasList.map((x) => (
+          <label key={x.id} className="flex min-h-11 items-start gap-3 rounded-xl border border-line bg-bg p-3 text-sm">
+            <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0" checked={x.endemicVaccines} onChange={async (e) => setNote((await actions.setEndemicVaccines(x.id, e.target.checked)) ?? (e.target.checked ? "Imunisasi wilayah endemis ditampilkan" : "Imunisasi wilayah endemis disembunyikan"))} />
+            <span><b>{x.name}</b>: tampilkan imunisasi khusus wilayah endemis (Japanese Encephalitis). Aktifkan hanya jika puskesmas memastikan wilayahnya termasuk.</span>
+          </label>
+        ))}
         <p className="text-sm text-mute">Terdaftar: {s.puskesmasList.length} puskesmas, {s.posyanduList.length} posyandu.</p>
       </section>
       {(demo || demoMsg) && (

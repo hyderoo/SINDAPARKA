@@ -6,11 +6,8 @@ export function ageInMonths(birth: string, on: string): number {
   if (d.getDate() < b.getDate()) m -= 1;
   return Math.max(0, m);
 }
-export const todayISO = () => {
-  const d = new Date();
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-};
+/** Today's date in Indonesia western time (WIB), independent of the phone's own timezone setting. */
+export const todayISO = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
 export function addMonths(iso: string, n: number): string {
   const d = new Date(iso + "T00:00:00");
   const day = d.getDate();

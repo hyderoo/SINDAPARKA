@@ -25,10 +25,18 @@ export interface Posyandu {
   id: string;
   name: string;
   puskesmasId: string;
+  visitDay: number | null; // day of the month the posyandu is held
 }
 export interface Puskesmas {
   id: string;
   name: string;
+  endemicVaccines: boolean; // show endemic-area-only vaccines (e.g. Japanese Encephalitis)
+}
+export interface Immunization {
+  id: string;
+  childId: string;
+  vaccine: string; // dose code, see schedule.ts
+  givenOn: string; // YYYY-MM-DD
 }
 export interface Profile {
   id: string;

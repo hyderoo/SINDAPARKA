@@ -7,7 +7,58 @@ import { Result } from "@/components/Result";
 import { GrowthChart } from "@/components/GrowthChart";
 import { EmptyState, StatusChip, zfmt } from "@/components/ui";
 import { posLabel, ageInMonths, fmtAge, fmtDate, todayISO } from "@/lib/age";
-import { remindersFor, VACCINES } from "@/lib/schedule";
+import { dosesFor, optsFor, remindersFor } from "@/lib/schedule";
+import { useState } from "react";
+import type { Child, Immunization } from "@/lib/types";
+
+function Imunisasi({ child, endemic, items, today }: { child: Child; endemic: boolean; items: Immunization[]; today: string }) {
+  const [open, setOpen] = useState<string | null>(null);
+  const [date, setDate] = useState(today);
+  const [err, setErr] = useState<string | null>(null);
+  const by = new Map(items.map((i) => [i.vaccine, i]));
+  const doses = dosesFor(endemic);
+  const given = doses.filter((d) => by.has(d.code)).length;
+  const save = async (code: string) => {
+    if (date < child.birth) { setErr("Tanggal sebelum anak lahir."); return; }
+    if (date > today) { setErr("Tanggal belum terjadi."); return; }
+    const e = await actions.setImmunization(child.id, code, date);
+    if (e) setErr(e); else { setOpen(null); setErr(null); }
+  };
+  return (
+    <section className="card p-5">
+      <details>
+      <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3"><h2 className="font-display text-xl font-semibold">Imunisasi</h2><span className="chip chip-ok">{given} dari {doses.length} tercatat</span></summary>
+      <p className="mb-3 mt-2 text-sm text-mute">Catat tanggal sesuai buku KIA. Yang belum tercatat belum tentu belum diberikan.</p>
+      <ul className="divide-y divide-line">
+        {doses.map((d) => {
+          const rec = by.get(d.code);
+          return (
+            <li key={d.code} className="py-2">
+              <div className="flex min-h-11 items-center gap-3">
+                <div className="min-w-0 flex-1"><div className="font-semibold">{d.name}</div><div className="text-xs text-mute">Usia {d.month} bln{d.endemic ? " · wilayah endemis" : ""}</div></div>
+                {rec ? <span className="chip chip-ok">{fmtDate(rec.givenOn)}</span> : <span className="text-xs text-mute">Belum dicatat</span>}
+                <button className="min-h-11 min-w-11 px-2 text-sm font-bold text-leaf underline" aria-label={`${rec ? "Ubah" : "Catat"} ${d.name}`} onClick={() => { setOpen(open === d.code ? null : d.code); setDate(rec?.givenOn ?? today); setErr(null); }}>{rec ? "Ubah" : "Catat"}</button>
+              </div>
+              {open === d.code && (
+                <div className="mb-2 grid gap-2 rounded-xl bg-paper p-3">
+                  <label className="label" htmlFor={`im-${d.code}`}>Tanggal diberikan</label>
+                  <input id={`im-${d.code}`} type="date" className="field" value={date} min={child.birth} max={today} onChange={(e) => setDate(e.target.value)} />
+                  {err && <p role="alert" className="text-sm font-semibold text-berry">{err}</p>}
+                  <div className="grid grid-cols-2 gap-2">
+                    <button className="btn btn-primary" onClick={() => save(d.code)}>Simpan</button>
+                    {rec ? <button className="btn btn-ghost !text-berry" onClick={async () => { if (confirm("Hapus catatan imunisasi ini?")) { const e = await actions.removeImmunization(rec.id); if (e) setErr(e); else setOpen(null); } }}>Hapus</button> : <button className="btn btn-ghost" onClick={() => setOpen(null)}>Batal</button>}
+                  </div>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      </details>
+      <p className="mt-3 text-xs text-mute">Jadwal rutin dari ayosehat.kemkes.go.id (Kemenkes). {endemic ? "Imunisasi khusus wilayah endemis ditampilkan karena diaktifkan admin." : "Imunisasi khusus wilayah endemis (mis. Japanese Encephalitis) disembunyikan; admin dapat mengaktifkannya."}</p>
+    </section>
+  );
+}
 
 export default function Detail() {
   const { id } = useParams<{ id: string }>();
@@ -17,7 +68,8 @@ export default function Detail() {
   if (!r) return <div className="card p-6">Anak tidak ditemukan. <Link className="font-bold text-leaf underline" href="/anak">Kembali ke daftar</Link></div>;
   const today = todayISO();
   const ageNow = ageInMonths(r.child.birth, today);
-  const rem = remindersFor(r.child, sc.measurements.filter((m) => m.childId === id), today);
+  const rem = remindersFor(r.child, sc.measurements.filter((m) => m.childId === id), today, optsFor(sc.s, r.child));
+  const imOpts = optsFor(sc.s, r.child);
   return (
     <div className="space-y-5">
       <Link href="/anak" className="inline-flex min-h-11 items-center text-sm font-bold text-leaf">← Semua anak</Link>
@@ -71,11 +123,8 @@ export default function Detail() {
           ))}
           {rem.length === 0 && <li className="text-mute">Tidak ada jadwal dekat.</li>}
         </ul>
-        <details className="mt-3 text-sm text-mute"><summary className="min-h-11 cursor-pointer font-bold">Jadwal imunisasi rutin bayi dan baduta (Kemenkes)</summary>
-          <ul className="mt-2 space-y-1">{VACCINES.map((v) => <li key={v.month}>Usia {v.month} bln: {v.name}</li>)}</ul>
-          <p className="mt-2 text-xs">Sumber: ayosehat.kemkes.go.id. Cek buku KIA dan arahan bidan untuk jadwal anak ini.</p>
-        </details>
       </section>
+      <Imunisasi child={r.child} endemic={imOpts.endemic} items={sc.s.immunizations.filter((x) => x.childId === id)} today={today} />
     </div>
   );
 }
