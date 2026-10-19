@@ -147,3 +147,14 @@ body {
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 .print-doc { display: none; }
+
+/* print template for the referral letter: A4 portrait */
+@page rujukan { size: A4 portrait; margin: 16mm; @bottom-center { content: "SINDAPARKA - RAHASIA - Halaman " counter(page) " dari " counter(pages); font-size: 8pt; color: #5f6b7a; } }
+.print-letter { display: none; }
+@media print {
+  .print-letter { display: block !important; color: #111827; font-size: 10pt; page: rujukan; line-height: 1.45; }
+  .print-letter table { width: 100%; border-collapse: collapse; }
+  .print-letter th, .print-letter td { border: 0.5pt solid #9aa5b4; padding: 3pt 6pt; text-align: left; }
+  .print-letter th { background: #e8f0fb; }
+  .print-letter .sig { break-inside: avoid; }
+}

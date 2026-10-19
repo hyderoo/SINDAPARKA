@@ -79,7 +79,10 @@ export default function Detail() {
           <p className="text-sm text-mute">{r.child.sex === "L" ? "Laki-laki" : "Perempuan"} · lahir {fmtDate(r.child.birth)} · {fmtAge(ageNow)} · {posLabel(r.child.posyandu)}</p>
           <p className="text-sm text-mute">Orang tua: {r.child.guardian}</p>
         </div>
-        <Link href={`/periksa?anak=${id}`} className="btn btn-primary w-full sm:w-auto">Catat penimbangan</Link>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Link href={`/periksa?anak=${id}`} className="btn btn-primary w-full sm:w-auto">Catat penimbangan</Link>
+          {r.last && <Link href={`/anak/${id}/rujukan`} className="btn btn-ghost w-full sm:w-auto">Surat rujukan</Link>}
+        </div>
       </header>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
