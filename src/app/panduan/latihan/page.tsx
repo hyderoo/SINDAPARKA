@@ -65,7 +65,7 @@ export default function Latihan() {
           <ol className="list-decimal space-y-0.5 pl-4">
             <li><b>0-3 mnt:</b> kenapa timbang-ukur tiap bulan (bagian 1), dengan contoh KMS.</li>
             <li><b>3-8 mnt:</b> peragaan menimbang dan mengukur oleh dua kader, satu sukarelawan anak atau boneka; peserta menyebutkan kesalahan yang sengaja diperagakan.</li>
-            <li><b>8-13 mnt:</b> latihan mencatat di aplikasi memakai data uji coba (anak fiktif "Anak Uji"), bukan data anak sungguhan. Data uji coba bisa dihapus admin dengan satu tombol.</li>
+            <li><b>8-13 mnt:</b> latihan mencatat di aplikasi memakai data uji coba (nama-nama anak fiktif), bukan data anak sungguhan. Data uji coba bisa dihapus admin dengan satu tombol.</li>
             <li><b>13-17 mnt:</b> membaca hasil bersama: status, tanda N/T, kurva turun, kapan rujuk (bagian 3).</li>
             <li><b>17-20 mnt:</b> tanya jawab dan bagi tugas pengukur, penimbang, dan pencatat untuk jadwal berikutnya.</li>
           </ol>
