@@ -45,11 +45,11 @@ VACC = [("hb0",0),("bcg",1),("polio1",1),("dpt1",2),("polio2",2),("pcv1",2),("ro
 # Per-posyandu archetype mixes so the map shows every prevalence band:
 # ~5% (green), ~12% (yellow), ~25% (orange), ~38% (red), ~50% (dark red)
 PROFILES = [
-    ["normal"]*7 + ["pendek"],
-    ["normal"]*6 + ["pendek", "overdue"],
-    ["normal"]*4 + ["pendek", "pendek", "sangat_pendek", "falling"],
-    ["normal"]*3 + ["pendek", "pendek", "sangat_pendek", "overdue", "falling"],
-    ["normal"]*2 + ["pendek", "pendek", "sangat_pendek", "sangat_pendek", "overdue", "falling"],
+    ["normal"]*7 + ["pendek"],                                       # ~8%  -> green
+    ["normal"]*6 + ["pendek", "pendek"],                             # ~17% -> yellow
+    ["normal"]*4 + ["pendek", "pendek", "sangat_pendek", "overdue"], # ~27% -> orange
+    ["normal"]*3 + ["pendek", "pendek", "sangat_pendek", "falling", "overdue"],  # ~36% -> red
+    ["normal"]*4 + ["pendek", "sangat_pendek", "falling", "overdue"],            # ~27% -> orange
 ]
 
 # Fictional common Indonesian names (random combinations, not real identifiable people)
