@@ -178,3 +178,13 @@ body {
 .map-pin.show-label .pin-label, .map-pin.is-sel .pin-label { display: block; }
 .map-pin.is-sel .pin-head { transform: rotate(-45deg) scale(1.22); box-shadow: 0 0 0 3px rgba(13,148,136,.35), 0 3px 8px rgba(0,0,0,.4); }
 .map-pin:focus-visible { outline: 2px solid #0f766e; outline-offset: 2px; border-radius: 8px; }
+
+/* printable parent consent form: A4 portrait, single page */
+@page persetujuan { size: A4 portrait; margin: 13mm; }
+@media print {
+  .print-consent { page: persetujuan; border: none; box-shadow: none; padding: 0; color: #111827; font-size: 9.5pt; line-height: 1.38; }
+  .print-consent h1 { font-size: 13pt; }
+  .print-consent h2 { font-size: 10pt; margin-bottom: 1pt; }
+  .print-consent > section, .print-consent > header, .print-consent > footer { break-inside: avoid; }
+  .print-consent .sig-box { height: 52pt; }
+}
