@@ -15,7 +15,10 @@ export default function Panduan() {
   return (
     <div className="mx-auto max-w-2xl space-y-4 p-4 md:p-8">
       <Link href="/periksa" className="inline-flex min-h-11 items-center text-sm font-bold text-leaf">&larr; Kembali</Link>
-      <h1 className="font-display text-3xl font-semibold">Cara menimbang dan mengukur anak dengan benar</h1>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <h1 className="font-display text-3xl font-semibold">Cara menimbang dan mengukur anak dengan benar</h1>
+        <Link href="/panduan/latihan" className="btn btn-ghost !min-h-10 px-3 text-sm">Panduan latihan kader (cetak 1 halaman)</Link>
+      </div>
       <p className="text-sm text-mute">
         Ringkasan praktis untuk kader posyandu, disarikan dari Standar Antropometri Anak (Permenkes RI No. 2 Tahun 2020),
         Buku KIA (Kemenkes), dan panduan pengukuran WHO untuk Standar Pertumbuhan Anak WHO 2006. Ini ringkasan, bukan pengganti
