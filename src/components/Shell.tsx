@@ -36,6 +36,45 @@ export function Logo({ size = 36 }: { size?: number }) {
   );
 }
 
+function SyncBar() {
+  const s = useStore();
+  const online = useOnline();
+  const [busy, setBusy] = useState(false);
+  const [open, setOpen] = useState(false);
+  if (!s || !s.userId || s.queue.length === 0) return null;
+  const errs = s.queue.filter((q) => q.error).length;
+  return (
+    <div className="no-print fixed inset-x-4 bottom-[84px] z-30 md:inset-x-auto md:bottom-6 md:right-8 md:w-[26rem]">
+      <div className="card border-2 border-sun p-3 shadow-lg">
+        <div className="flex items-center gap-3">
+          <span className="min-w-0 flex-1 text-sm font-bold">{s.queue.length} catatan menunggu dikirim{errs > 0 ? ` (${errs} perlu diperbaiki)` : ""}</span>
+          <button className="btn btn-ghost !min-h-10 shrink-0 px-3 text-sm" onClick={() => setOpen(!open)} aria-expanded={open}>{open ? "Tutup" : "Lihat"}</button>
+          <button className="btn btn-primary !min-h-10 shrink-0 px-3 text-sm" disabled={!online || busy}
+            onClick={async () => { setBusy(true); await actions.syncQueue(); setBusy(false); }}>
+            {busy ? "Mengirim..." : online ? "Kirim sekarang" : "Offline"}
+          </button>
+        </div>
+        {open && (
+          <div className="mt-2 border-t border-line pt-2">
+            <p className="mb-2 text-xs text-mute">Ditimbang saat tidak ada sinyal. Tersimpan sementara di perangkat ini dan dikirim otomatis begitu ada sinyal. Tidak ada yang ditimpa: kalau server menolak, catatan tetap di sini.</p>
+            <ul className="max-h-48 space-y-2 overflow-y-auto">
+              {s.queue.map((q) => (
+                <li key={q.id} className="flex items-center gap-2 rounded-lg bg-bg p-2 text-sm">
+                  <span className="min-w-0 flex-1">
+                    <b>{q.childName}</b>{q.isNewChild ? " (anak baru)" : ""} · {q.date} · {String(q.weight).replace(".", ",")} kg
+                    {q.error && <span className="block text-xs font-semibold text-berry">{q.error}</span>}
+                  </span>
+                  <button className="min-h-10 shrink-0 px-2 text-xs font-bold text-berry underline" onClick={() => { if (confirm("Hapus catatan yang belum terkirim ini dari perangkat?")) actions.removeQueued(q.id); }}>Hapus</button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function AccountMenu() {
   const s = useStore();
   const router = useRouter();
@@ -138,6 +177,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <Link href="/metode" className="no-print mx-4 mt-1 flex min-h-11 items-center text-[11px] leading-snug text-mute md:mx-8"><span>{t(lang, "demo")} <u>Selengkapnya</u></span></Link>
         <main className="px-4 pt-4 md:px-8 md:pt-6">{s.error ? <LoadError message={s.error} onRetry={() => actions.refresh()} /> : !s.loaded ? <PageSkeleton /> : children}</main>
       </div>
+      <SyncBar />
 
       <nav className="no-print fixed inset-x-0 bottom-0 z-20 border-t border-line bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden" aria-label="Menu utama">
         <div className="mx-auto grid max-w-xl grid-cols-5">

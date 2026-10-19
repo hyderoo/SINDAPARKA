@@ -23,6 +23,38 @@ interface State {
   measurements: Measurement[];
   immunizations: Immunization[];
   lang: "id" | "en";
+  queue: QueuedEntry[];
+}
+
+/** One penimbangan recorded while offline. Carries the child's sex and birth date so z-scores
+    can be computed at send time, and a client-made child id when the child is new.
+    Stored on this device only until sent; visible and deletable in the app. */
+export interface QueuedEntry {
+  id: string; // queue entry id
+  queuedAt: string;
+  childId: string; // existing child id, or the client-made id of the new child
+  isNewChild: boolean;
+  childName: string;
+  childSex: "L" | "P";
+  childBirth: string;
+  posyanduId: string;
+  guardian: string;
+  consentAt: string;
+  date: string;
+  weight: number;
+  height: number;
+  lying: boolean;
+  error?: string;
+}
+
+// Pending offline entries live in localStorage, not the full child dataset: only what the kader
+// typed while offline, shown in the app until it is sent, then removed.
+const QUEUE_KEY = "sindaparka.queue.v1";
+function readQueue(): QueuedEntry[] {
+  try { const v = JSON.parse(localStorage.getItem(QUEUE_KEY) ?? "[]"); return Array.isArray(v) ? v : []; } catch { return []; }
+}
+function writeQueue(q: QueuedEntry[]) {
+  try { if (q.length) localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); else localStorage.removeItem(QUEUE_KEY); } catch {}
 }
 
 // Child data is kept in memory only. It is never written to localStorage.
@@ -30,6 +62,7 @@ const LANG_KEY = "sindaparka.lang";
 const empty = (lang: "id" | "en"): State => ({
   ready: false, loading: false, loaded: false, error: null, userId: null, email: null, fullName: "", role: null, status: null,
   posyandu: "all", posyanduId: null, posyanduList: [], puskesmasList: [], children: [], measurements: [], immunizations: [], lang,
+  queue: readQueue(),
 });
 let state: State | null = null;
 const listeners = new Set<() => void>();
@@ -58,6 +91,12 @@ export function useStore(): State | null {
   useEffect(() => { start(); }, []);
   return s;
 }
+
+/** True when the failure looks like a lost connection, not a server-side rejection. */
+const isOfflineError = (e: unknown) => {
+  const m = String((e as { message?: string })?.message ?? e).toLowerCase();
+  return m.includes("fetch") || m.includes("network") || m.includes("failed to fetch") || m.includes("load failed") || m.includes("koneksi");
+};
 
 const msg = (e: unknown) => {
   const m = e && typeof e === "object" && "message" in e ? String((e as { message: string }).message) : "Terjadi kesalahan.";
@@ -126,6 +165,8 @@ function start() {
   supabase.auth.onAuthStateChange((ev) => {
     if (ev === "SIGNED_IN" || ev === "SIGNED_OUT" || ev === "USER_UPDATED") setTimeout(refresh, 0);
   });
+  window.addEventListener("online", () => { if (readQueue().length) actions.syncQueue(); });
+  if (navigator.onLine && readQueue().length) setTimeout(() => actions.syncQueue(), 4000);
 }
 
 export const actions = {
@@ -184,6 +225,65 @@ export const actions = {
     if (error) return msg(error);
     await refresh();
     return null;
+  },
+  /** Queue a penimbangan made while offline. Returns null (it is safely on the device). */
+  queueMeasurement(e: Omit<QueuedEntry, "id" | "queuedAt">): null {
+    const entry: QueuedEntry = { ...e, id: crypto.randomUUID(), queuedAt: new Date().toISOString() };
+    const q = [...readQueue(), entry];
+    writeQueue(q);
+    patch({ queue: q });
+    return null;
+  },
+  removeQueued(id: string) {
+    const q = readQueue().filter((x) => x.id !== id);
+    writeQueue(q);
+    patch({ queue: q });
+  },
+  /** Send queued entries oldest-first. Never overwrites: a server-side conflict keeps the entry
+      on the device with its error message for the kader to resolve. */
+  async syncQueue(): Promise<{ sent: number; failed: number }> {
+    let sent = 0, failed = 0;
+    for (const entry of readQueue()) {
+      try {
+        if (entry.isNewChild) {
+          const { data: existing } = await supabase.from("children").select("id").eq("id", entry.childId).maybeSingle();
+          if (!existing) {
+            const { error } = await supabase.from("children").insert({
+              id: entry.childId, name: entry.childName, sex: entry.childSex, birth_date: entry.childBirth,
+              posyandu_id: entry.posyanduId, guardian_name: entry.guardian || null, consent_at: entry.consentAt,
+            });
+            if (error) throw error;
+          }
+        }
+        // duplicate guard: an identical measurement already on the server counts as sent
+        const { data: dup, error: de } = await supabase.from("measurements").select("id,weight_kg,length_height_cm")
+          .eq("child_id", entry.childId).eq("measured_on", entry.date).is("deleted_at", null);
+        if (de) throw de;
+        const same = (dup ?? []).some((m) => Number(m.weight_kg) === entry.weight && Number(m.length_height_cm) === entry.height);
+        if (!same) {
+          const a = assess(entry.childSex, ageInMonths(entry.childBirth, entry.date), entry.weight, entry.height, entry.lying);
+          const r2 = (v: number | null) => (v == null ? null : Math.round(v * 100) / 100);
+          const { error } = await supabase.from("measurements").insert({
+            child_id: entry.childId, measured_on: entry.date, weight_kg: entry.weight, length_height_cm: entry.height, lying: entry.lying,
+            z_hfa: r2(a.hfa), z_wfa: r2(a.wfa), z_wfh: r2(a.wfh), z_bfa: r2(a.bfa),
+          });
+          if (error) throw error;
+        }
+        sent++;
+        const q = readQueue().filter((x) => x.id !== entry.id);
+        writeQueue(q);
+        patch({ queue: q });
+      } catch (e) {
+        failed++;
+        const m = msg(e);
+        const q = readQueue().map((x) => (x.id === entry.id ? { ...x, error: m } : x));
+        writeQueue(q);
+        patch({ queue: q });
+        if (isOfflineError(e)) break; // still offline: stop, keep the rest for later
+      }
+    }
+    if (sent > 0) await refresh();
+    return { sent, failed };
   },
   async deleteMeasurement(id: string): Promise<string | null> {
     const { error } = await supabase.from("measurements").update({ deleted_at: new Date().toISOString() }).eq("id", id);
