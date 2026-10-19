@@ -129,7 +129,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const online = useOnline();
   const lang = s?.lang ?? "id";
   const PUBLIC = ["/", "/masuk", "/daftar", "/lupa", "/atur-ulang", "/menunggu", "/privasi", "/metode", "/panduan"];
-  const isLanding = PUBLIC.includes(path);
+  const isLanding = PUBLIC.includes(path) || path.startsWith("/privasi/") || path.startsWith("/panduan/");
 
   useEffect(() => {
     if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") navigator.serviceWorker.register("/sw.js").catch(() => {});
