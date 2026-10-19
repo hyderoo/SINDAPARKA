@@ -55,7 +55,7 @@ export function z(ind: Indicator, sex: Sex, ageMonths: number, y: number, height
   if (ind === "wfh") {
     if (heightCm == null) return null;
     key = ageMonths <= 24 ? "wfl" : "wfh";
-    x = Math.round(heightCm * 2) / 2;
+    x = heightCm; // tables step 0.5 cm; row() interpolates linearly between neighbours
   } else {
     key = ind;
     x = ageMonths;
