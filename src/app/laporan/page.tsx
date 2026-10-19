@@ -31,6 +31,21 @@ export default function Laporan() {
     } finally { setBusy(false); }
   };
   const T = rep.total;
+  // Monthly stunting trend per posyandu: each child's latest measurement up to the end of that month.
+  const trendMonths = [...months].reverse(); // oldest -> newest
+  const trendPos = (sc.s.role !== "kader" ? sc.s.posyanduList.map((x) => x.name) : [sc.s.posyandu]).map((p) => {
+    const rr = sc.rows.filter((r) => r.child.posyandu === p);
+    const cells = trendMonths.map((m) => {
+      const end = addMonths(m + "-01", 1); // first day of the next month
+      let n = 0, st = 0;
+      rr.forEach((r) => {
+        const pt = [...r.pts].filter((x) => x.m.date < end).pop();
+        if (pt && pt.a.hfa != null) { n++; if (pt.a.stunted) st++; }
+      });
+      return { n, pct: n ? (st / n) * 100 : 0 };
+    });
+    return { p, cells };
+  }).filter((x) => x.cells.some((c) => c.n > 0));
   const lv = (x: { level: string } | null) => (x ? `lv-${x.level}` : "");
   const z = (v: number | null) => (v == null ? "-" : v.toFixed(2).replace(".", ","));
   const n1 = (v: number) => v.toFixed(1).replace(".", ",");
@@ -66,6 +81,37 @@ export default function Laporan() {
         </div>
         <p className="mt-3 text-xs text-mute">{NOTE_METHOD}</p>
         <p className="mt-2 text-xs text-mute">Unduhan Excel berisi dua lembar: Ringkasan dan Data anak (nama, umur, berat, tinggi, z-score, status). {NOTE_FORMAT}</p>
+      </section>
+
+      <section className="card p-4 md:p-6 print:hidden">
+        <h2 className="font-display text-xl font-semibold">Tren bulanan per posyandu</h2>
+        <p className="mt-1 text-xs text-mute">Persentase anak pendek (z-score TB/U di bawah -2) memakai pengukuran terakhir setiap anak sampai akhir bulan itu. Tanda · berarti kurang dari 10 anak terukur, terlalu sedikit untuk persentase yang berarti.</p>
+        <p className="mb-1 mt-2 text-xs text-mute md:hidden">Geser tabel ke samping untuk melihat semua bulan.</p>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px] text-sm tabular-nums">
+            <thead><tr className="border-b-2 border-line text-left text-xs text-mute">
+              <th className="px-2 py-2 font-bold">Posyandu</th>
+              {trendMonths.map((m) => <th key={m} className="px-2 py-2 text-right font-bold">{fmtMonthYear(m + "-01")}</th>)}
+            </tr></thead>
+            <tbody>
+              {trendPos.map((x) => (
+                <tr key={x.p} className="border-b border-line">
+                  <td className="px-2 py-3 font-bold">{x.p}</td>
+                  {x.cells.map((c, i) => (
+                    <td key={i} className="px-2 text-right">
+                      {c.n < 10 ? <span className="text-mute">·</span> : (
+                        <span className={`font-bold ${c.pct >= 20 ? "text-clay" : "text-ink"}`}>{c.pct.toFixed(0)}%</span>
+                      )}
+                      {c.n > 0 && <span className="block text-[10px] text-mute">{c.n} anak</span>}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+              {trendPos.length === 0 && <tr><td colSpan={trendMonths.length + 1} className="px-2 py-4 text-mute">Belum ada pengukuran pada 6 bulan terakhir.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-3 text-xs text-mute">Oranye berarti 20% atau lebih, di atas prevalensi nasional 19,8% (SSGI 2024).</p>
       </section>
 
       {/* Print template (A4 landscape). Hidden on screen, shown when printing or saving as PDF. */}
