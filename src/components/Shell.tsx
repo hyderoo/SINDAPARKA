@@ -8,10 +8,11 @@ import { fmtDate } from "@/lib/age";
 import { LoadError, PageSkeleton } from "@/components/Skeleton";
 import { ConfirmProvider, useConfirm } from "@/components/Confirm";
 
+/* Periksa sits in the middle so the mobile FAB is the true centre item. */
 const NAV: { href: string; k: Key; icon: string; adminOnly?: boolean }[] = [
   { href: "/dashboard", k: "nav_dashboard", icon: "M3 12l9-8 9 8M5 10v10h14V10" },
-  { href: "/periksa", k: "nav_periksa", icon: "M12 5v14M5 12h14" },
   { href: "/anak", k: "nav_anak", icon: "M16 11a4 4 0 10-8 0 4 4 0 008 0zM4 21c0-4 4-6 8-6s8 2 8 6" },
+  { href: "/periksa", k: "nav_periksa", icon: "M12 5v14M5 12h14" },
   { href: "/jadwal", k: "nav_jadwal", icon: "M5 6h14v14H5zM5 10h14M9 3v5M15 3v5" },
   { href: "/laporan", k: "nav_laporan", icon: "M6 3h9l4 4v14H6zM9 12h7M9 16h7" },
 ];
@@ -195,12 +196,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
             const on = path.startsWith(n.href);
             const center = n.href === "/periksa";
             return (
-              <Link key={n.href} href={n.href} aria-current={on ? "page" : undefined} className={`flex min-h-16 flex-col items-center justify-center gap-0.5 text-[11px] font-bold ${on ? "text-leaf" : "text-mute"}`}>
-                {center ? (
-                  <span className="-mt-6 flex h-12 w-12 items-center justify-center rounded-full bg-clay text-white shadow-lg"><Icon d={n.icon} /></span>
-                ) : (
-                  <Icon d={n.icon} />
-                )}
+              <Link key={n.href} href={n.href} aria-current={on ? "page" : undefined} className={`flex min-h-16 flex-col items-center justify-center gap-1 text-[11px] font-bold ${on ? "text-leaf" : "text-mute"}`}>
+                {/* Fixed-height icon slot keeps every label on the same baseline; the centre FAB overflows upward. */}
+                <span className="flex h-6 items-center justify-center">
+                  {center ? (
+                    <span className={`flex h-12 w-12 items-center justify-center rounded-full bg-clay text-white shadow-lg ${on ? "ring-2 ring-leaf ring-offset-2 ring-offset-card" : ""}`}><Icon d={n.icon} /></span>
+                  ) : (
+                    <Icon d={n.icon} />
+                  )}
+                </span>
                 {t(lang, n.k)}
               </Link>
             );
