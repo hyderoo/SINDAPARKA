@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useScope } from "@/lib/scope";
 import { actions } from "@/lib/store";
@@ -28,6 +28,18 @@ function Form() {
   const [err, setErr] = useState<string | null>(null);
   const [posture, setPosture] = useState<"auto" | "lying" | "standing">("auto");
 
+  const resRef = useRef<HTMLElement>(null);
+  const [resSeen, setResSeen] = useState(false);
+  useEffect(() => {
+    const el = resRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setResSeen(e.isIntersecting), { threshold: 0.15 });
+    io.observe(el);
+    return () => io.disconnect();
+  });
+  const noKids = !!sc && sc.children.length === 0;
+  useEffect(() => { if (noKids) setIsNew(true); }, [noKids]);
+  const pick = (id: string) => { setChildId(id); setTimeout(() => document.getElementById("bb")?.focus(), 50); };
   const child = sc?.children.find((c) => c.id === childId);
   const eSex = isNew ? sex : child?.sex;
   const eBirth = isNew ? birth : child?.birth;
@@ -60,7 +72,7 @@ function Form() {
   };
 
   return (
-    <div className="grid gap-5 lg:grid-cols-2">
+    <div className="grid gap-5 pb-20 lg:grid-cols-2 lg:pb-0">
       <section className="card space-y-4 p-5">
         <h2 className="font-display text-xl font-semibold">1. Siapa anaknya?</h2>
         <div className="grid grid-cols-2 gap-2">
@@ -72,7 +84,7 @@ function Form() {
             {child ? (
               <div className="flex items-center justify-between rounded-xl bg-leaf-soft p-3">
                 <div><div className="font-bold">{child.name}</div><div className="text-xs text-mute">{child.sex === "L" ? "Laki-laki" : "Perempuan"} · {fmtAge(ageInMonths(child.birth, todayISO()))} · Posyandu {child.posyandu}</div></div>
-                <button className="text-sm font-bold text-leaf underline" onClick={() => setChildId("")}>Ganti</button>
+                <button className="min-h-11 px-3 text-sm font-bold text-leaf underline" onClick={() => setChildId("")}>Ganti</button>
               </div>
             ) : (
               <>
@@ -80,7 +92,7 @@ function Form() {
                 <input id="cari" className="field" placeholder="Ketik nama anak" value={q} onChange={(e) => setQ(e.target.value)} />
                 <ul className="mt-2 divide-y divide-line rounded-xl border border-line bg-white">
                   {matches.map((c) => (
-                    <li key={c.id}><button className="flex min-h-14 w-full items-center justify-between px-3 text-left" onClick={() => setChildId(c.id)}><span className="font-bold">{c.name}</span><span className="text-xs text-mute">{c.posyandu}</span></button></li>
+                    <li key={c.id}><button className="flex min-h-14 w-full items-center justify-between px-3 text-left" onClick={() => pick(c.id)}><span className="font-bold">{c.name}</span><span className="text-xs text-mute">{c.posyandu}</span></button></li>
                   ))}
                   {matches.length === 0 && <li className="p-3 text-sm text-mute">Tidak ketemu. Pilih &quot;Anak baru&quot;.</li>}
                 </ul>
@@ -107,7 +119,7 @@ function Form() {
 
         <h2 className="pt-2 font-display text-xl font-semibold">2. Hasil ukur</h2>
         <div className="grid grid-cols-2 gap-3">
-          <div><label className="label" htmlFor="bb">Berat (kg)</label><input id="bb" inputMode="decimal" className="field" placeholder="9,5" value={w} onChange={(e) => setW(e.target.value)} /></div>
+          <div><label className="label" htmlFor="bb">Berat (kg)</label><input id="bb" inputMode="decimal" className="field" placeholder="9,5" value={w} onChange={(e) => setW(e.target.value)} enterKeyHint="next" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); document.getElementById("tb")?.focus(); } }} /></div>
           <div><label className="label" htmlFor="tb">{age != null && age <= 24 ? "Panjang (cm)" : "Tinggi (cm)"}</label><input id="tb" inputMode="decimal" className="field" placeholder="75,5" value={h} onChange={(e) => setH(e.target.value)} /></div>
         </div>
         <div>
@@ -125,7 +137,7 @@ function Form() {
         {warn && <p className="rounded-xl bg-berry-soft p-3 text-sm font-semibold text-berry">{warn}</p>}
       </section>
 
-      <section className="card p-5">
+      <section ref={resRef} id="hasil" className="card scroll-mt-4 p-5">
         <h2 className="mb-3 font-display text-xl font-semibold">3. Hasil</h2>
         {a && age != null ? (
           <>
@@ -137,6 +149,13 @@ function Form() {
           <p className="text-mute">Isi data anak, berat, dan tinggi. Hasil z-score muncul di sini otomatis.</p>
         )}
       </section>
+      {a && !resSeen && (
+        <div className="no-print fixed inset-x-4 bottom-[88px] z-10 lg:hidden">
+          <button type="button" className="btn btn-primary w-full shadow-lg" onClick={() => document.getElementById("hasil")?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+            Lihat hasil: {a.sHfa ? a.sHfa.label : "selesai"}{canSave ? " dan simpan" : ""}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
