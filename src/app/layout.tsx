@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description:
     "Catat penimbangan, hitung z-score WHO, dan pantau tren pertumbuhan balita di posyandu.",
   manifest: "/manifest.webmanifest",
-  icons: { icon: "/icon.svg", apple: "/icon.svg" },
+  icons: { icon: [{ url: "/icon-32.png", sizes: "32x32", type: "image/png" }, { url: "/favicon.ico", sizes: "any" }], apple: "/apple-touch-icon.png" },
 };
 export const viewport: Viewport = { themeColor: "#0B63CE", width: "device-width", initialScale: 1 };
 

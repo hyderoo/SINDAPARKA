@@ -15,8 +15,8 @@ export default function Landing() {
   return (
     <main className="mx-auto grid min-h-dvh max-w-5xl items-center gap-10 px-5 py-10 md:grid-cols-[1.1fr_1fr]">
       <section className="rise">
-        <div className="mb-6 flex items-center gap-3">
-          <Logo size={44} />
+        <div className="mb-6 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
+          <Logo size={34} />
           <span className="font-display text-2xl font-bold">SINDAPARKA</span>
         </div>
         <h1 className="font-display text-[2.1rem] font-semibold leading-[1.1] md:text-5xl">
@@ -32,7 +32,7 @@ export default function Landing() {
             <li key={x} className="flex gap-2"><span className="text-leaf">✓</span>{x}</li>
           ))}
         </ul>
-        <p className="mt-6 max-w-md text-xs text-mute">Ini alat bantu, bukan alat diagnosis medis.</p>
+        <p className="mt-6 max-w-md text-xs text-mute">Proyek tim bersama BKKBN untuk kader posyandu Parakan Kauman, Temanggung. Ini alat bantu, bukan alat diagnosis medis.</p>
         <Partners />
       </section>
 

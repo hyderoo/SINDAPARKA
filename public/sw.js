@@ -1,4 +1,4 @@
-const CACHE = "sindaparka-v3";
+const CACHE = "sindaparka-v4";
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(["/", "/masuk", "/dashboard", "/periksa", "/anak"])).then(() => self.skipWaiting()));
 });

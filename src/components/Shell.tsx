@@ -22,13 +22,17 @@ function Icon({ d }: { d: string }) {
   );
 }
 
+/* Official logos, unaltered: full BKKBN lockup (kemendukbangga.go.id) and Undip (undip.ac.id). */
 export function Logo({ size = 36 }: { size?: number }) {
+  const h = Math.round(size * 1.0);
   return (
-    <svg width={size} height={size} viewBox="0 0 512 512" aria-hidden>
-      <rect width="512" height="512" rx="112" fill="#0B63CE" />
-      <path d="M150 380V250M256 380V170M362 380V210" stroke="#F4F6F9" strokeWidth="44" strokeLinecap="round" />
-      <circle cx="256" cy="116" r="30" fill="#F9AB00" />
-    </svg>
+    <span className="flex shrink-0 items-center gap-2" aria-label="BKKBN dan Universitas Diponegoro" role="img">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/logos/bkkbn.png" width={1200} height={320} alt="" style={{ height: Math.round(h * 1.15), width: "auto" }} />
+      <span className="h-6 w-px bg-line" aria-hidden />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/logos/undip.png" width={381} height={446} alt="" style={{ height: h, width: "auto" }} />
+    </span>
   );
 }
 
@@ -86,7 +90,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
       <div className="min-w-0 flex-1 pb-28 md:pb-10">
         <div className="no-print flex flex-wrap items-center gap-2 px-4 pt-3 text-xs md:px-8">
-          <Link href="/dashboard" className="flex items-center gap-2 md:hidden"><Logo size={28} /><span className="font-display text-lg font-bold">SINDAPARKA</span></Link>
+          <Link href="/dashboard" className="flex items-center gap-2 md:hidden"><Logo size={28} /><span className="font-display text-base font-bold">SINDAPARKA</span></Link>
           <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
             {!online && <span className="chip chip-moderate">{t(lang, "offline")}</span>}
             {s.role === "admin" && <Link href="/admin" className="chip chip-watch min-h-9 md:hidden">Admin</Link>}
