@@ -99,8 +99,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto flex min-h-dvh max-w-[1240px]">
       <aside className="no-print sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-1 p-5 md:flex">
-        <Link href="/dashboard" className="mb-6 flex items-center gap-3">
-          <Logo />
+        <Link href="/dashboard" className="mb-6 flex flex-col items-start gap-2">
+          <Logo size={30} />
           <span className="font-display text-xl font-bold">SINDAPARKA</span>
         </Link>
         {nav.map((n) => {
