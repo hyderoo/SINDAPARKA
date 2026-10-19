@@ -1,5 +1,5 @@
 import type { Row } from "./analytics";
-import { ageInMonths, fmtDate, fmtMonthYear } from "./age";
+import { ageInMonths, fmtDate, fmtMonthYear, todayISO } from "./age";
 import type { Status } from "./who";
 
 /* Format ringkas SINDAPARKA. This is a summary layout built for this app. It is NOT an official Kemenkes,
@@ -171,6 +171,59 @@ export async function buildXlsx(rep: Report): Promise<Blob> {
   s2.headerFooter.oddFooter = "&LSINDAPARKA - RAHASIA&CHalaman &P dari &N&R&D";
   s1.headerFooter.oddFooter = "&LSINDAPARKA - RAHASIA&CHalaman &P dari &N&R&D";
 
+  const buf = await wb.xlsx.writeBuffer();
+  return new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+}
+
+/* Generic child register ("register balita"): every registered child with their latest measurement.
+   This is a generic SINDAPARKA layout, NOT the official puskesmas format (Sigizi, e-PPGBM, LB3).
+   The exact format the puskesmas uses still needs confirmation from puskesmas staff. */
+export const NOTE_REGISTER = "Register umum SINDAPARKA, bukan format resmi puskesmas (Sigizi/e-PPGBM/LB3). Konfirmasikan format yang dipakai ke petugas puskesmas.";
+
+export async function buildRegisterXlsx(rows: Row[], meta: { puskesmas: string; scopeLabel: string }): Promise<Blob> {
+  const ExcelJS = (await import("exceljs")).default;
+  const wb = new ExcelJS.Workbook();
+  wb.creator = "SINDAPARKA";
+  const BLUE = "FF0B63CE", INK = "FF1F2937", MUTE = "FF5F6B7A", LINE = "FFD5DBE3";
+  const thin = { style: "thin" as const, color: { argb: LINE } };
+  const box = { top: thin, left: thin, bottom: thin, right: thin };
+  const ws = wb.addWorksheet("Register balita", { views: [{ state: "frozen", ySplit: 6, xSplit: 3, showGridLines: false }], pageSetup: { orientation: "landscape", paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0, printTitlesRow: "6:6" } });
+  const cols = [["No", 5], ["Posyandu", 24], ["Nama anak", 28], ["JK", 5], ["Tanggal lahir", 13], ["Umur (bln)", 9], ["Nama orang tua/wali", 26], ["Tanggal ukur terakhir", 14], ["BB (kg)", 8], ["PB/TB (cm)", 10], ["Status TB/U", 20], ["Status BB/TB", 20], ["Kurva turun", 11]] as const;
+  ws.columns = cols.map(([, w]) => ({ width: w }));
+  ws.mergeCells(1, 1, 1, cols.length);
+  const t = ws.getCell(1, 1); t.value = "REGISTER BALITA"; t.font = { name: "Calibri", size: 16, bold: true, color: { argb: BLUE } };
+  ws.mergeCells(2, 1, 2, cols.length);
+  ws.getCell(2, 1).value = `Puskesmas: ${meta.puskesmas}   |   Posyandu: ${meta.scopeLabel}   |   Per ${fmtDate(todayISO())}`; ws.getCell(2, 1).font = { size: 10, bold: true, color: { argb: INK } };
+  ws.mergeCells(3, 1, 3, cols.length);
+  ws.getCell(3, 1).value = NOTE_REGISTER; ws.getCell(3, 1).font = { size: 9, italic: true, color: { argb: MUTE } };
+  ws.mergeCells(4, 1, 4, cols.length);
+  ws.getCell(4, 1).value = "Semua anak terdaftar, diukur maupun belum. Umur dihitung sampai tanggal pembuatan berkas."; ws.getCell(4, 1).font = { size: 9, italic: true, color: { argb: MUTE } };
+  const h = ws.getRow(6); h.values = cols.map(([n]) => n); h.height = 30;
+  h.eachCell((c) => { c.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 10 }; c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: BLUE } }; c.alignment = { horizontal: "center", vertical: "middle", wrapText: true }; c.border = box; });
+  const sorted = [...rows].sort((a, b) => a.child.posyandu.localeCompare(b.child.posyandu) || a.child.name.localeCompare(b.child.name));
+  const today = todayISO();
+  sorted.forEach((r, i) => {
+    const pt = r.last;
+    const row = ws.getRow(7 + i);
+    row.values = [
+      i + 1, r.child.posyandu, r.child.name, r.child.sex, utcDate(r.child.birth), ageInMonths(r.child.birth, today), r.child.guardian,
+      pt ? utcDate(pt.m.date) : "belum diukur", pt?.m.weight ?? "-", pt?.m.height ?? "-",
+      pt?.a.sHfa?.label ?? "-", pt?.a.sWfh?.label ?? "-", r.trend === "falling" ? "Ya" : "",
+    ];
+    row.eachCell((c, n) => { c.border = box; c.alignment = { horizontal: [2, 3, 7, 11, 12].includes(n) ? "left" : "center", vertical: "middle" }; });
+    row.getCell(5).numFmt = "dd/mm/yyyy";
+    if (pt) row.getCell(8).numFmt = "dd/mm/yyyy";
+    ([[11, pt?.a.sHfa ?? null], [12, pt?.a.sWfh ?? null]] as const).forEach(([n, s]) => { if (s) row.getCell(n).fill = { type: "pattern", pattern: "solid", fgColor: { argb: LEVEL_FILL[s.level] ?? "FFFFFFFF" } }; });
+    if (r.trend === "falling") row.getCell(13).fill = { type: "pattern", pattern: "solid", fgColor: { argb: LEVEL_FILL.watch } };
+  });
+  if (sorted.length) ws.autoFilter = { from: { row: 6, column: 1 }, to: { row: 6 + sorted.length, column: cols.length } };
+  const f0 = 7 + sorted.length + 1;
+  [`Dibuat dari SINDAPARKA pada ${fmtDate(today)}.`, NOTE_METHOD, NOTE_TOOL, NOTE_CONF].forEach((txt, i) => {
+    ws.mergeCells(f0 + i, 1, f0 + i, cols.length);
+    const c = ws.getCell(f0 + i, 1); c.value = txt; c.alignment = { wrapText: true, vertical: "top" };
+    c.font = { size: 9, italic: i !== 3, bold: i === 3, color: { argb: i === 3 ? "FFB3261E" : MUTE } };
+  });
+  ws.headerFooter.oddFooter = "&LSINDAPARKA - RAHASIA&CHalaman &P dari &N&R&D";
   const buf = await wb.xlsx.writeBuffer();
   return new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
 }

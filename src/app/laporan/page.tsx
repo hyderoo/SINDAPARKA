@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useScope } from "@/lib/scope";
 import { addMonths, fmtDate, fmtMonthYear, todayISO } from "@/lib/age";
-import { buildReport, buildXlsx, NOTE_CONF, NOTE_FORMAT, NOTE_METHOD, NOTE_TOOL, pct } from "@/lib/report";
+import { buildRegisterXlsx, buildReport, buildXlsx, NOTE_CONF, NOTE_FORMAT, NOTE_METHOD, NOTE_REGISTER, NOTE_TOOL, pct } from "@/lib/report";
 
 export default function Laporan() {
   const sc = useScope();
@@ -19,16 +19,20 @@ export default function Laporan() {
     scopeLabel: sc.s.role !== "kader" ? "Semua posyandu" : sc.s.posyandu,
     todayIso: today,
   });
+  const download = (blob: Blob, name: string) => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  };
   const xlsx = async () => {
     setBusy(true);
-    try {
-      const blob = await buildXlsx(rep);
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `laporan-sindaparka-${mon}.xlsx`;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-    } finally { setBusy(false); }
+    try { download(await buildXlsx(rep), `laporan-sindaparka-${mon}.xlsx`); } finally { setBusy(false); }
+  };
+  const register = async () => {
+    setBusy(true);
+    try { download(await buildRegisterXlsx(sc.rows, { puskesmas: rep.puskesmas, scopeLabel: rep.posyanduScope }), `register-balita-sindaparka-${today}.xlsx`); } finally { setBusy(false); }
   };
   const T = rep.total;
   // Monthly stunting trend per posyandu: each child's latest measurement up to the end of that month.
@@ -56,6 +60,7 @@ export default function Laporan() {
         <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
           <select className="field !min-h-11 col-span-2 sm:w-auto" aria-label="Bulan" value={mon} onChange={(e) => setMon(e.target.value)}>{months.map((m) => <option key={m} value={m}>{fmtMonthYear(m + "-01")}</option>)}</select>
           <button className="btn btn-ghost !min-h-11 whitespace-nowrap" onClick={xlsx} disabled={busy}>{busy ? "Menyiapkan..." : "Unduh Excel"}</button>
+          <button className="btn btn-ghost !min-h-11 whitespace-nowrap" onClick={register} disabled={busy}>Unduh register</button>
           <button className="btn btn-primary !min-h-11 whitespace-nowrap" onClick={() => window.print()}>Cetak / PDF</button>
         </div>
       </div>
@@ -81,6 +86,7 @@ export default function Laporan() {
         </div>
         <p className="mt-3 text-xs text-mute">{NOTE_METHOD}</p>
         <p className="mt-2 text-xs text-mute">Unduhan Excel berisi dua lembar: Ringkasan dan Data anak (nama, umur, berat, tinggi, z-score, status). {NOTE_FORMAT}</p>
+        <p className="mt-2 text-xs text-mute">Tombol &quot;Unduh register&quot; berisi semua anak terdaftar dengan pengukuran terakhirnya. {NOTE_REGISTER}</p>
       </section>
 
       <section className="card p-4 md:p-6 print:hidden">
