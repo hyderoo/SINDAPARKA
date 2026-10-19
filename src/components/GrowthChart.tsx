@@ -84,6 +84,24 @@ export function GrowthChart({ sex, pts }: { sex: Sex; pts: Point[] }) {
         {pts.length > 0 && (() => { const p = pts[pts.length - 1]; const px = x(p.age); const right = px > W - 70; return <text x={right ? px - 9 : px + 9} y={y(val(p)) + 4} textAnchor={right ? "end" : "start"} fontSize="12" fontWeight="700" fill="#1F2937">{val(p).toFixed(1)}</text>; })()}
       </svg></div>
       <p className="mt-1 text-xs text-mute">Pita hijau: rentang normal (-2 sampai +2 SD). Garis putus-putus: batas -3, -2, +2, +3 SD. Titik hitam: hasil pengukuran anak. Sumbu bawah: usia dalam bulan.{zoom ? " Tampilan diperbesar ke rentang usia kunjungan anak." : ""}</p>
+      {ind === "wfa" && pts.length >= 2 && (
+        <div className="mt-3">
+          <div className="mb-1 text-xs font-bold text-mute">Bacaan KMS: N = berat naik dibanding penimbangan sebelumnya, T = tidak naik</div>
+          <ol className="flex flex-wrap items-center gap-1" aria-label="Berat naik atau tidak naik dari kunjungan ke kunjungan">
+            {pts.slice(1).map((p, i) => {
+              const prev = pts[i];
+              const up = p.m.weight > prev.m.weight;
+              return (
+                <li key={p.m.id}
+                  aria-label={`${p.m.date}: ${up ? "naik" : "tidak naik"} dibanding ${prev.m.date}`}
+                  title={`${p.m.date}: ${String(prev.m.weight).replace(".", ",")} → ${String(p.m.weight).replace(".", ",")} kg`}
+                  className={`chip ${up ? "chip-ok" : "chip-severe"}`}>{up ? "N" : "T"}</li>
+              );
+            })}
+          </ol>
+          <p className="mt-1 text-xs text-mute">T dua kali berturut-turut berarti berat anak tidak naik 2 bulan: perlu perhatian dan konsultasi ke puskesmas.</p>
+        </div>
+      )}
     </div>
   );
 }
