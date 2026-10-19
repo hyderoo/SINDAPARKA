@@ -42,7 +42,15 @@ VACC = [("hb0",0),("bcg",1),("polio1",1),("dpt1",2),("polio2",2),("pcv1",2),("ro
         ("dpt2",3),("polio3",3),("pcv2",3),("rota2",3),("dpt3",4),("polio4",4),("ipv1",4),
         ("rota3",4),("mr1",9),("ipv2",9),("pcv3",12)]
 
-ARCH = ["normal", "normal", "pendek", "sangat_pendek", "falling", "normal", "pendek", "overdue"]
+# Per-posyandu archetype mixes so the map shows every prevalence band:
+# ~5% (green), ~12% (yellow), ~25% (orange), ~38% (red), ~50% (dark red)
+PROFILES = [
+    ["normal"]*7 + ["pendek"],
+    ["normal"]*6 + ["pendek", "overdue"],
+    ["normal"]*4 + ["pendek", "pendek", "sangat_pendek", "falling"],
+    ["normal"]*3 + ["pendek", "pendek", "sangat_pendek", "overdue", "falling"],
+    ["normal"]*2 + ["pendek", "pendek", "sangat_pendek", "sangat_pendek", "overdue", "falling"],
+]
 
 # Fictional common Indonesian names (random combinations, not real identifiable people)
 BOY = ["Aditya","Bima","Rafi","Dimas","Farhan","Galih","Rizky","Fajar","Ilham","Danu","Arka","Banyu","Satria","Yoga","Aldo","Raka","Naufal","Zidan","Bagas","Daffa","Haidar","Kevin","Rehan","Pradana","Gibran","Darren","Fathan"]
@@ -55,7 +63,8 @@ n = 0
 for pi, (pname, dusun) in enumerate(POSYANDU):
     for ci in range(12):
         n += 1
-        arch = ARCH[(pi * 3 + ci) % len(ARCH)]
+        prof = PROFILES[pi % len(PROFILES)]
+        arch = prof[(ci + pi) % len(prof)]
         sex = "L" if (n % 2 == 1) else "P"
         age_now = random.choice([4, 7, 11, 14, 18, 22, 26, 31, 36, 42, 48, 54])
         by = TODAY[0] - age_now // 12
