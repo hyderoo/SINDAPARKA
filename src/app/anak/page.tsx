@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useScope } from "@/lib/scope";
 import { priority } from "@/lib/analytics";
-import { StatusChip } from "@/components/ui";
+import { EmptyState, StatusChip } from "@/components/ui";
 import { fmtAge, fmtDate, todayISO, ageInMonths } from "@/lib/age";
 
 type F = "all" | "stunted" | "falling" | "ok";
@@ -59,7 +59,17 @@ export default function Anak() {
           </li>
         ))}
       </ul>
-      {list.length === 0 && <p className="card p-6 text-center text-mute">Tidak ada anak yang cocok dengan filter ini.</p>}
+      {list.length === 0 && sc.rows.length === 0 && (
+        <EmptyState title="Belum ada data anak" text="Mulai dari penimbangan pertama. Data anak dan hasil ukur dicatat dalam satu langkah.">
+          <Link href="/periksa" className="btn btn-primary w-full">Catat anak pertama</Link>
+        </EmptyState>
+      )}
+      {list.length === 0 && sc.rows.length > 0 && (
+        <EmptyState icon="search" title="Tidak ada yang cocok" text="Coba nama lain, atau tampilkan semua anak.">
+          <button className="btn btn-ghost w-full" onClick={() => { setQ(""); setF("all"); setPos("all"); }}>Hapus pencarian dan filter</button>
+          <Link href={`/periksa`} className="btn btn-ghost w-full">Daftarkan anak baru</Link>
+        </EmptyState>
+      )}
     </div>
   );
 }

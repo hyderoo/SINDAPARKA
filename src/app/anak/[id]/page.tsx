@@ -5,7 +5,7 @@ import { useScope } from "@/lib/scope";
 import { actions } from "@/lib/store";
 import { Result } from "@/components/Result";
 import { GrowthChart } from "@/components/GrowthChart";
-import { StatusChip, zfmt } from "@/components/ui";
+import { EmptyState, StatusChip, zfmt } from "@/components/ui";
 import { posLabel, ageInMonths, fmtAge, fmtDate, todayISO } from "@/lib/age";
 import { remindersFor, VACCINES } from "@/lib/schedule";
 
@@ -20,7 +20,7 @@ export default function Detail() {
   const rem = remindersFor(r.child, sc.measurements.filter((m) => m.childId === id), today);
   return (
     <div className="space-y-5">
-      <Link href="/anak" className="text-sm font-bold text-leaf">← Semua anak</Link>
+      <Link href="/anak" className="inline-flex min-h-11 items-center text-sm font-bold text-leaf">← Semua anak</Link>
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start">
         <div className="min-w-0 flex-1">
           <h1 className="font-display text-3xl font-semibold">{r.child.name}</h1>
@@ -38,7 +38,7 @@ export default function Detail() {
         </section>
         <section className="card min-w-0 p-5">
           <h2 className="mb-3 font-display text-xl font-semibold">Penilaian terakhir</h2>
-          {r.last ? <Result a={r.last.a} age={r.last.age} trend={r.trend} /> : <p className="text-mute">Belum ada penimbangan.</p>}
+          {r.last ? <Result a={r.last.a} age={r.last.age} trend={r.trend} /> : <EmptyState compact icon="calendar" title="Belum ada penimbangan" text="Penilaian muncul setelah berat dan tinggi pertama dicatat."><Link href={`/periksa?anak=${id}`} className="btn btn-primary w-full">Catat penimbangan</Link></EmptyState>}
         </section>
       </div>
 
@@ -51,7 +51,7 @@ export default function Detail() {
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="font-bold">{fmtDate(p.m.date)}</span>
                 <span className="text-xs text-mute">{fmtAge(p.age)}</span>
-                <button className="ml-auto text-xs font-bold text-berry underline" onClick={() => { if (confirm("Hapus penimbangan ini?")) actions.deleteMeasurement(p.m.id); }}>Hapus</button>
+                <button className="ml-auto min-h-11 px-3 text-xs font-bold text-berry underline" onClick={() => { if (confirm("Hapus penimbangan ini?")) actions.deleteMeasurement(p.m.id); }}>Hapus</button>
               </div>
               <div className="text-sm tabular-nums">{p.m.weight.toString().replace(".", ",")} kg · {p.m.height.toString().replace(".", ",")} cm · z TB/U {zfmt(p.a.hfa)}</div>
               <div className="mt-1"><StatusChip s={p.a.sHfa} /></div>

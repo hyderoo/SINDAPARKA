@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useScope } from "@/lib/scope";
 import { prevalence, priority } from "@/lib/analytics";
-import { StatusChip } from "@/components/ui";
+import { EmptyState, StatusChip } from "@/components/ui";
 import { posLabel, fmtAge, fmtMonthYear, todayISO, addMonths } from "@/lib/age";
 import { t } from "@/lib/i18n";
 
@@ -80,7 +80,7 @@ export default function Dashboard() {
           <h2 className="font-display text-xl font-semibold">{t(lang, "attention")}</h2>
           <Link href="/periksa" className="btn btn-primary !min-h-11">{t(lang, "new_measure")}</Link>
         </div>
-        {alerts.length === 0 && <p className="mt-3 text-mute">Tidak ada anak yang perlu perhatian khusus.</p>}
+        {alerts.length === 0 && <EmptyState compact icon="check" title={rows.length ? "Tidak ada yang perlu perhatian khusus" : "Belum ada data"} text={rows.length ? "Semua anak yang tercatat dalam batas normal dan kurvanya tidak turun." : "Daftar ini terisi setelah ada penimbangan."} />}
         <ul className="mt-3 divide-y divide-line">
           {alerts.slice(0, 8).map((r) => (
             <li key={r.child.id}>

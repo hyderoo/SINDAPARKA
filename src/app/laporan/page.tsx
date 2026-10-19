@@ -50,7 +50,7 @@ export default function Laporan() {
         </div>
       </div>
       <section className="card p-4 md:p-6">
-        <div className="mb-4 flex items-center gap-3"><Logo size={32} /><div><div className="font-display text-xl font-semibold">Laporan penimbangan balita</div><div className="text-sm text-mute">{fmtMonthYear(mon + "-01")} · data demo sintetis</div></div></div>
+        <div className="mb-4 flex flex-wrap items-center gap-3"><Logo size={28} /><div><div className="font-display text-xl font-semibold">Laporan penimbangan balita</div><div className="text-sm text-mute">{fmtMonthYear(mon + "-01")} · data demo sintetis</div></div></div>
         <p className="mb-1 text-xs text-mute md:hidden">Geser tabel ke samping untuk melihat semua kolom.</p>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-sm tabular-nums">

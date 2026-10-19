@@ -29,7 +29,7 @@ export default function Jadwal() {
             {g.items.map((r) => (
               <li key={r.childId + r.kind} className="card flex items-center gap-3 p-3">
                 <div className="min-w-0 flex-1">
-                  <Link href={`/anak/${r.childId}`} className="block truncate font-bold">{r.child.name}</Link>
+                  <Link href={`/anak/${r.childId}`} className="flex min-h-11 items-center truncate font-bold">{r.child.name}</Link>
                   <div className="text-sm text-mute">{r.title}</div>
                   <span className={`chip mt-1 ${g.tone}`}>{fmtDate(r.due)}</span>
                 </div>
@@ -37,7 +37,7 @@ export default function Jadwal() {
               </li>
             ))}
           </ul>
-          {g.items.length === 0 && <p className="text-sm text-mute">Kosong.</p>}
+          {g.items.length === 0 && <p className="rounded-xl bg-white p-3 text-sm text-mute">Tidak ada yang masuk kategori ini.</p>}
         </section>
       ))}
     </div>
