@@ -3,6 +3,7 @@ const D = {
   nav_dashboard: { id: "Ringkasan", en: "Overview" },
   nav_periksa: { id: "Periksa", en: "Measure" },
   nav_anak: { id: "Anak", en: "Children" },
+  nav_peta: { id: "Peta", en: "Map" },
   nav_jadwal: { id: "Jadwal", en: "Schedule" },
   nav_laporan: { id: "Laporan", en: "Reports" },
   nav_admin: { id: "Admin", en: "Admin" },

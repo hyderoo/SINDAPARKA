@@ -26,6 +26,9 @@ export interface Posyandu {
   name: string;
   puskesmasId: string;
   visitDay: number | null; // day of the month the posyandu is held
+  lat: number | null;
+  lng: number | null;
+  dusun: string | null;
 }
 export interface Puskesmas {
   id: string;
