@@ -42,6 +42,9 @@ export default function Admin() {
   const [po, setPo] = useState("");
   const [pkId, setPkId] = useState("");
   const [note, setNote] = useState<string | null>(null);
+  const [demo, setDemo] = useState(false);
+  const [demoMsg, setDemoMsg] = useState<string | null>(null);
+  useEffect(() => { if (s?.role === "admin") actions.hasDemo().then(setDemo); }, [s?.role]);
   const load = () => actions.listProfiles().then(setList).catch((e) => setErr(String(e.message ?? e)));
   useEffect(() => { if (s?.role === "admin") load(); }, [s?.role]);
   if (!s) return null;
@@ -66,6 +69,18 @@ export default function Admin() {
         {note && <p className="text-sm font-semibold text-mute">{note}</p>}
         <p className="text-sm text-mute">Terdaftar: {s.puskesmasList.length} puskesmas, {s.posyanduList.length} posyandu.</p>
       </section>
+      {(demo || demoMsg) && (
+        <section className="card space-y-3 border-2 border-sun p-5">
+          <h2 className="font-display text-xl font-semibold">Data uji coba</h2>
+          {demo ? (
+            <>
+              <p className="text-sm text-mute">Aplikasi masih berisi anak fiktif untuk uji coba. Hapus sebelum data anak yang sebenarnya dimasukkan. Yang dihapus: semua anak, pengukuran, imunisasi, dan puskesmas atau posyandu uji coba beserta catatan perubahannya. Akun pengguna tidak ikut dihapus. Tidak bisa dibatalkan.</p>
+              <button className="btn btn-ghost !border-berry text-berry" onClick={async () => { if (!confirm("Hapus semua data uji coba? Tindakan ini tidak bisa dibatalkan.")) return; setDemoMsg(await actions.deleteDemo()); setDemo(await actions.hasDemo()); }}>Hapus data uji coba</button>
+            </>
+          ) : null}
+          {demoMsg && <p className="text-sm font-semibold text-mute" role="status">{demoMsg}</p>}
+        </section>
+      )}
       {err && <Msg kind="err">{err}</Msg>}
       <section className="space-y-3">
         <h2 className="font-display text-xl font-semibold">Menunggu persetujuan ({pending.length})</h2>

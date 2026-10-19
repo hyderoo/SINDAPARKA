@@ -192,6 +192,17 @@ export const actions = {
     const { error } = await supabase.from("profiles").update({ role: p.role, status: p.status, posyandu_id: p.posyanduId, puskesmas_id: p.puskesmasId }).eq("id", id);
     return error ? msg(error) : null;
   },
+  async hasDemo(): Promise<boolean> {
+    const { data } = await supabase.rpc("has_demo_data");
+    return data === true;
+  },
+  async deleteDemo(): Promise<string> {
+    const { data, error } = await supabase.rpc("delete_demo_data");
+    if (error) return msg(error);
+    await refresh();
+    const d = data as { children: number; measurements: number };
+    return `Data uji coba dihapus: ${d.children} anak dan ${d.measurements} pengukuran.`;
+  },
   async addPuskesmas(name: string): Promise<string | null> {
     const { error } = await supabase.from("puskesmas").insert({ name: name.trim() });
     if (error) return msg(error);

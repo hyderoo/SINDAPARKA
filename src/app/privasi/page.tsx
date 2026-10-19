@@ -30,7 +30,7 @@ export default function Privasi() {
         <li>Hubungan dengan sistem resmi Kemenkes (e-PPGBM, ASIK): apakah SINDAPARKA boleh dipakai berdampingan, dan apakah data perlu diekspor ke sana.</li>
         <li>Tinjauan hukum atas dasar pemrosesan menurut UU 27/2022 (Pelindungan Data Pribadi), karena data kesehatan anak termasuk data pribadi yang bersifat spesifik.</li>
       </ol>
-      <p className="text-sm text-mute">Sampai butir di atas ditetapkan, gunakan hanya data contoh (berlabel DEMO).</p>
+      <p className="text-sm text-mute">Sampai butir di atas ditetapkan, jangan memasukkan data anak yang sebenarnya. Data yang ada sekarang fiktif untuk uji coba.</p>
     </main>
   );
 }
