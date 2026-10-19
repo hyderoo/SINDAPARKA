@@ -12,8 +12,10 @@ export default function Privasi() {
       <p>Nama anak, jenis kelamin, tanggal lahir, nama orang tua atau wali (opsional), posyandu, berat badan, panjang atau tinggi badan, tanggal ukur, dan tanggal persetujuan orang tua. Untuk pengguna: nama, email, peran, dan posyandu.</p>
       <h2 className="font-display text-xl font-semibold">Siapa yang bisa melihat</h2>
       <p>Kader hanya melihat anak di posyandunya. Tenaga kesehatan melihat posyandu di puskesmasnya. Admin melihat semua dan menyetujui akun. Aturan ini dijalankan oleh database (Row Level Security), bukan hanya oleh tampilan aplikasi. Pendaftar baru tidak bisa melihat data apa pun sampai disetujui admin.</p>
+      <p>Rekap statistik (peta, laporan) hanya menampilkan jumlah dan persentase per posyandu. Kelompok dengan kurang dari 10 anak terukur tidak ditampilkan, supaya anak tidak bisa dikenali dari angkanya.</p>
       <h2 className="font-display text-xl font-semibold">Persetujuan</h2>
-      <p>Anak baru hanya bisa didaftarkan setelah kader menyatakan orang tua atau wali sudah diberi tahu dan setuju. Tanggal pernyataan itu disimpan. Persetujuan tertulis tetap perlu disimpan oleh posyandu sesuai ketentuan pengendali data.</p>
+      <p>Anak baru hanya bisa didaftarkan setelah kader menyatakan orang tua atau wali sudah diberi tahu dan setuju. Tanggal pernyataan itu disimpan. Persetujuan tertulis tetap perlu disimpan oleh posyandu sesuai ketentuan pengendali data - sesuai UU No. 27 Tahun 2022, pemrosesan data anak wajib dengan persetujuan orang tua dan/atau wali (Pasal 25), dan persetujuan harus tertulis atau terekam (Pasal 22).</p>
+      <p><Link href="/privasi/persetujuan" className="font-bold text-leaf underline">Formulir persetujuan orang tua/wali (rancangan, siap cetak)</Link> - menunggu persetujuan puskesmas sebelum dipakai.</p>
       <h2 className="font-display text-xl font-semibold">Penyimpanan dan penghapusan</h2>
       <p>Data disimpan di Supabase (database PostgreSQL) di wilayah Sydney, Australia, dengan koneksi terenkripsi. Penghapusan penimbangan bersifat soft delete dan tercatat. Perubahan data anak dan penimbangan dicatat di log audit. Kebijakan masa simpan dan permintaan penghapusan dari orang tua harus ditetapkan oleh pengendali data.</p>
       <h2 className="font-display text-xl font-semibold">Siapa yang bertanggung jawab atas data</h2>
@@ -31,6 +33,7 @@ export default function Privasi() {
         <li>Tinjauan hukum atas dasar pemrosesan menurut UU 27/2022 (Pelindungan Data Pribadi), karena data kesehatan anak termasuk data pribadi yang bersifat spesifik.</li>
       </ol>
       <p className="text-sm text-mute">Sampai butir di atas ditetapkan, jangan memasukkan data anak yang sebenarnya. Data yang ada sekarang fiktif untuk uji coba.</p>
+      <p className="text-sm text-mute">Rujukan: <a href="https://www.peraturan.go.id/id/uu-no-27-tahun-2022" className="underline">UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi (peraturan.go.id)</a> - data anak dan data kesehatan termasuk data pribadi yang bersifat spesifik (Pasal 4 ayat (2)).</p>
     </main>
   );
 }

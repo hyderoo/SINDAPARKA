@@ -164,7 +164,7 @@ function Form() {
             )}
             <label className="flex items-start gap-3 rounded-xl border border-line bg-bg p-3 text-sm">
               <input type="checkbox" className="mt-1 h-5 w-5 shrink-0" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-              <span>Orang tua atau wali sudah diberi tahu dan menyetujui data anak ini dicatat di SINDAPARKA. Tanggal persetujuan dicatat hari ini.</span>
+              <span>Orang tua atau wali sudah diberi tahu dan menyetujui data anak ini dicatat di SINDAPARKA. Tanggal persetujuan dicatat hari ini. <Link href="/privasi/persetujuan" target="_blank" className="font-bold text-leaf underline">Lihat formulir persetujuan (rancangan)</Link></span>
             </label>
           </div>
         )}
