@@ -169,3 +169,12 @@ body {
   .print-sheet h1 { font-size: 13pt; }
   .print-sheet h2 { font-size: 9.5pt; margin-bottom: 1pt; }
 }
+
+/* posyandu map pins: transit-style coded markers */
+.map-pin { position: relative; width: 36px; height: 30px; background: none; border: 0; padding: 0; cursor: pointer; }
+.map-pin .pin-head { position: absolute; left: 3px; top: 0; width: 30px; height: 30px; border-radius: 50% 50% 50% 4px; transform: rotate(-45deg); background: var(--pin-c, #8a8f98); border: 2.5px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; transition: transform .15s ease, box-shadow .15s ease; }
+.map-pin .pin-code { transform: rotate(45deg); color: #fff; font-size: 10px; font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
+.map-pin .pin-label { position: absolute; top: 33px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,.96); border: 1px solid #e5e2dc; border-radius: 999px; padding: 1px 8px; font-size: 10px; font-weight: 700; color: #3f3a34; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,.15); display: none; pointer-events: none; }
+.map-pin.show-label .pin-label, .map-pin.is-sel .pin-label { display: block; }
+.map-pin.is-sel .pin-head { transform: rotate(-45deg) scale(1.22); box-shadow: 0 0 0 3px rgba(13,148,136,.35), 0 3px 8px rgba(0,0,0,.4); }
+.map-pin:focus-visible { outline: 2px solid #0f766e; outline-offset: 2px; border-radius: 8px; }
