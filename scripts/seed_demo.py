@@ -44,10 +44,16 @@ VACC = [("hb0",0),("bcg",1),("polio1",1),("dpt1",2),("polio2",2),("pcv1",2),("ro
 
 ARCH = ["normal", "normal", "pendek", "sangat_pendek", "falling", "normal", "pendek", "overdue"]
 
+# Fictional common Indonesian names (random combinations, not real identifiable people)
+BOY = ["Aditya","Bima","Rafi","Dimas","Farhan","Galih","Rizky","Fajar","Ilham","Danu","Arka","Banyu","Satria","Yoga","Aldo","Raka","Naufal","Zidan","Bagas","Daffa","Haidar","Kevin","Rehan","Pradana","Gibran","Darren","Fathan"]
+GIRL = ["Ayu","Kirana","Nadia","Putri","Zahra","Aisyah","Dewi","Ratri","Sinta","Wulan","Cahaya","Laras","Naura","Safa","Kayla","Anisa","Bella","Citra","Fira","Gita","Hana","Indah","Meisya","Nayla","Raisa","Salma","Tania"]
+SECOND = ["Pratama","Prasetyo","Saputra","Wijaya","Nugraha","Firmansyah","Hidayat","Kurniawan","Santoso","Ramadhan","Akbar","Maulana","Setyawan","Anggraini","Lestari","Puspitasari","Rahmawati","Wulandari","Ningsih","Safitri","Maharani","Oktaviani","Permatasari"]
+ADULT = ["Joko","Bambang","Agus","Slamet","Dedi","Eko","Herman","Wahyu","Supriyanto","Rudi","Siti","Sri","Endang","Rina","Yuni","Ratna","Sutrisno","Painem","Legiman","Sarwono","Ngatiyem","Warsito","Sumarno","Karsini","Lasmi","Puji","Teguh","Ambar"]
+
 children, measurements, immunizations = [], [], []
 n = 0
 for pi, (pname, dusun) in enumerate(POSYANDU):
-    for ci in range(3):
+    for ci in range(12):
         n += 1
         arch = ARCH[(pi * 3 + ci) % len(ARCH)]
         sex = "L" if (n % 2 == 1) else "P"
@@ -58,7 +64,9 @@ for pi, (pname, dusun) in enumerate(POSYANDU):
         bd = random.randint(2, 25)
         birth = f"{by:04d}-{bm:02d}-{bd:02d}"
         cid = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"sindaparka-demo-child-{n}"))
-        children.append((cid, pname, sex, birth, arch))
+        cname = f"{random.choice(BOY if sex == 'L' else GIRL)} {random.choice(SECOND)}"
+        gname = f"{random.choice(ADULT)} {random.choice(SECOND)}"
+        children.append((cid, pname, sex, birth, arch, cname, gname))
 
         # z trajectory
         if arch == "normal": base = random.uniform(-0.8, 0.5); drift = 0
@@ -107,20 +115,21 @@ for pi, (pname, dusun) in enumerate(POSYANDU):
 
 lines = []
 lines.append("begin;")
-lines.append("delete from public.immunizations where child_id in (select id from public.children where is_demo and name like 'Anak Uji %');")
-lines.append("delete from public.measurements where child_id in (select id from public.children where is_demo and name like 'Anak Uji %');")
-lines.append("delete from public.children where is_demo and name like 'Anak Uji %';")
-lines.append("delete from public.posyandu where is_demo and name like 'Candrarini %';")
+DEMO_KIDS = "(select c.id from public.children c left join public.posyandu p on c.posyandu_id = p.id where c.is_demo and (p.puskesmas_id = '%s' or c.name like 'Anak Uji %%'))" % PK
+lines.append(f"delete from public.immunizations where child_id in {DEMO_KIDS};")
+lines.append(f"delete from public.measurements where child_id in {DEMO_KIDS};")
+lines.append(f"delete from public.children where id in {DEMO_KIDS};")
+lines.append(f"delete from public.posyandu where is_demo and puskesmas_id = '{PK}' and name like 'Candrarini %';")
 for pi, (pname, dusun) in enumerate(POSYANDU):
     pid = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"sindaparka-demo-posyandu-{pname}"))
     lat = round(CENTER[0] + ((pi % 4) - 1.5) * 0.004 + ((pi * 7) % 3 - 1) * 0.0015, 6)
     lng = round(CENTER[1] + ((pi // 4) - 1.5) * 0.0045 + ((pi * 5) % 3 - 1) * 0.0015, 6)
     lines.append(f"insert into public.posyandu (id, puskesmas_id, name, dusun, latitude, longitude, visit_day, is_demo) values "
                  f"('{pid}', '{PK}', '{pname}', '{dusun}', {lat}, {lng}, {3 + (pi % 25)}, true);")
-    for (cid, cp, sex, birth, arch) in [c for c in children if c[1] == pname]:
+    for (cid, cp, sex, birth, arch, cname, gname) in [c for c in children if c[1] == pname]:
         lines.append(f"insert into public.children (id, posyandu_id, name, sex, birth_date, guardian_name, consent_at, created_by, is_demo) values "
-                     f"('{cid}', '{pid}', 'Anak Uji {children.index((cid, cp, sex, birth, arch)) + 1:02d}', '{sex}', '{birth}', "
-                     f"'Orang Tua Uji', '{birth}', '{ADMIN}', true);")
+                     f"('{cid}', '{pid}', '{cname}', '{sex}', '{birth}', "
+                     f"'{gname}', '{birth}', '{ADMIN}', true);")
 def batch(table, cols, rows, per=100):
     for i in range(0, len(rows), per):
         vals = ",\n".join("(" + ", ".join(r) + ")" for r in rows[i:i+per])
