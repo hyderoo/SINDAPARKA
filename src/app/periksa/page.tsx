@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useScope } from "@/lib/scope";
@@ -183,6 +184,7 @@ function Form() {
           <p className="mt-1 text-xs text-mute">Standar: 0 sampai 24 bulan berbaring, di atas 24 bulan berdiri. Kalau cara ukur berbeda, hasil dikoreksi 0,7 cm sesuai Permenkes 2/2020.</p>
         </div>
         <div><label className="label" htmlFor="tg">Tanggal ukur</label><input id="tg" type="date" className="field" value={date} max={todayISO()} onChange={(e) => setDate(e.target.value)} /></div>
+        <Link href="/panduan" className="inline-flex min-h-11 items-center text-sm font-bold text-leaf underline">Panduan menimbang dan mengukur yang benar</Link>
         {age != null && <p className="text-sm text-mute">Usia saat diukur: <b className="text-ink">{fmtAge(age)}</b> ({age} bulan). </p>}
         {dup.length > 0 && (
           <p role="alert" className="rounded-xl bg-[#FDF3E0] p-3 text-sm font-semibold text-[#9A6B00]">

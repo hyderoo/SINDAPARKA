@@ -119,7 +119,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const online = useOnline();
   const lang = s?.lang ?? "id";
-  const PUBLIC = ["/", "/masuk", "/daftar", "/lupa", "/atur-ulang", "/menunggu", "/privasi", "/metode"];
+  const PUBLIC = ["/", "/masuk", "/daftar", "/lupa", "/atur-ulang", "/menunggu", "/privasi", "/metode", "/panduan"];
   const isLanding = PUBLIC.includes(path);
 
   useEffect(() => {
