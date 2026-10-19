@@ -97,6 +97,7 @@ export default function Peta() {
               <div className="card space-y-1 p-4" role="status">
                 <div className="font-display text-xl font-semibold">{cur.p.name}</div>
                 {cur.p.dusun && <div className="text-sm text-mute">{cur.p.dusun}</div>}
+                {cur.p.isDemo && <div className="rounded-lg bg-sun-soft px-2 py-1 text-xs font-semibold text-[#7A5B00]">Pin contoh (perkiraan), bukan lokasi asli.</div>}
                 {cur.visible ? (
                   <>
                     <div>Anak dipantau: <b>{cur.children}</b></div>

@@ -29,6 +29,7 @@ export interface Posyandu {
   lat: number | null;
   lng: number | null;
   dusun: string | null;
+  isDemo: boolean;
 }
 export interface Puskesmas {
   id: string;

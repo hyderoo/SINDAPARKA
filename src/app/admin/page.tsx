@@ -86,6 +86,7 @@ function LocRow({ p }: { p: Posyandu }) {
   return (
     <li className="space-y-2 rounded-xl border border-line bg-bg p-3">
       <div className="font-bold">{p.name}</div>
+      {p.isDemo && p.lat != null && <p className="rounded-lg bg-sun-soft px-2 py-1 text-xs font-semibold text-[#7A5B00]">Pin perkiraan untuk uji coba, bukan lokasi asli. Ganti dengan pin asli posyandu; pin contoh ikut terhapus lewat tombol hapus data uji coba.</p>}
       <div className="grid gap-2 sm:grid-cols-3">
         <input className="field min-w-0" aria-label={`Dusun atau RW, ${p.name}`} placeholder="Dusun / RW" value={dusun} onChange={(e) => setDusun(e.target.value)} />
         <input className="field min-w-0" inputMode="decimal" aria-label={`Lintang, ${p.name}`} placeholder="Lintang (contoh -7.2864)" value={lat} onChange={(e) => setLat(e.target.value)} />

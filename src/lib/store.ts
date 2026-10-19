@@ -150,14 +150,14 @@ async function refresh() {
     if (p.status !== "active") { patch({ ...base, loading: false, loaded: true, children: [], measurements: [], immunizations: [], posyanduList: [], puskesmasList: [] }); return; }
     const [pk0, pos, kids, ms, ims] = await withTimeout(Promise.all([
       fetchAll<{ id: string; name: string; endemic_vaccines: boolean }>("puskesmas", "id,name,endemic_vaccines", "name"),
-      fetchAll<{ id: string; name: string; puskesmas_id: string; visit_day: number | null; latitude: number | null; longitude: number | null; dusun: string | null }>("posyandu", "id,name,puskesmas_id,visit_day,latitude,longitude,dusun", "name"),
+      fetchAll<{ id: string; name: string; puskesmas_id: string; visit_day: number | null; latitude: number | null; longitude: number | null; dusun: string | null; is_demo: boolean | null }>("posyandu", "id,name,puskesmas_id,visit_day,latitude,longitude,dusun,is_demo", "name"),
       fetchAll<Record<string, string | null>>("children", "id,name,sex,birth_date,posyandu_id,guardian_name,consent_at", "name"),
       fetchAll<Record<string, string | number | boolean | null>>("measurements", "id,child_id,measured_on,weight_kg,length_height_cm,lying,note", "measured_on"),
       fetchAll<{ id: string; child_id: string; vaccine: string; given_on: string }>("immunizations", "id,child_id,vaccine,given_on", "given_on"),
     ]));
     const pk = pk0.map((x) => ({ id: x.id, name: x.name, endemicVaccines: !!x.endemic_vaccines }));
     const immunizations: Immunization[] = ims.map((i) => ({ id: i.id, childId: i.child_id, vaccine: i.vaccine, givenOn: i.given_on }));
-    const posyanduList = pos.map((x) => ({ id: x.id, name: x.name, puskesmasId: x.puskesmas_id, visitDay: x.visit_day ?? null, lat: x.latitude ?? null, lng: x.longitude ?? null, dusun: x.dusun ?? null }));
+    const posyanduList = pos.map((x) => ({ id: x.id, name: x.name, puskesmasId: x.puskesmas_id, visitDay: x.visit_day ?? null, lat: x.latitude ?? null, lng: x.longitude ?? null, dusun: x.dusun ?? null, isDemo: x.is_demo === true }));
     const nameOf = new Map(posyanduList.map((x) => [x.id, x.name]));
     const children: Child[] = kids.map((k) => ({
       id: k.id as string, name: k.name as string, sex: k.sex as "L" | "P", birth: k.birth_date as string,
