@@ -44,6 +44,9 @@ export interface QueuedEntry {
   weight: number;
   height: number;
   lying: boolean;
+  /** Email of the account that recorded the entry, so a shared phone never sends
+      or shows another kader's pending entries under the wrong login. */
+  ownerEmail?: string;
   error?: string;
 }
 
@@ -55,6 +58,21 @@ function readQueue(): QueuedEntry[] {
 }
 function writeQueue(q: QueuedEntry[]) {
   try { if (q.length) localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); else localStorage.removeItem(QUEUE_KEY); } catch {}
+}
+
+/** Accounts previously used on this device, for quick switching on shared phones.
+    Only the email and display name are remembered - never the password; switching
+    always requires typing the password again. */
+export interface RecentKader { email: string; name: string; at: string }
+const RECENT_KEY = "sindaparka.recentKader.v1";
+export function readRecentKader(): RecentKader[] {
+  try { const v = JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]"); return Array.isArray(v) ? v.filter((x) => x && typeof x.email === "string") : []; } catch { return []; }
+}
+function rememberKader(email: string, name: string) {
+  try {
+    const list = [{ email, name, at: new Date().toISOString() }, ...readRecentKader().filter((x) => x.email !== email)].slice(0, 5);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+  } catch {}
 }
 
 // Child data is kept in memory only. It is never written to localStorage.
@@ -179,6 +197,7 @@ export const actions = {
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (error) return error.message === "Invalid login credentials" ? "Email atau kata sandi salah." : error.message === "Email not confirmed" ? "Email belum dikonfirmasi. Cek kotak masuk Anda." : error.message;
     await refresh();
+    rememberKader(email.trim(), get().fullName || email.trim());
     return null;
   },
   async signUp(email: string, password: string, fullName: string): Promise<{ error?: string; needsConfirm?: boolean }> {
@@ -187,6 +206,9 @@ export const actions = {
     });
     if (error) return { error: error.message };
     return { needsConfirm: !data.session };
+  },
+  forgetKader(email: string) {
+    try { localStorage.setItem(RECENT_KEY, JSON.stringify(readRecentKader().filter((x) => x.email !== email))); } catch {}
   },
   async signOut() {
     await supabase.auth.signOut();
@@ -228,7 +250,7 @@ export const actions = {
   },
   /** Queue a penimbangan made while offline. Returns null (it is safely on the device). */
   queueMeasurement(e: Omit<QueuedEntry, "id" | "queuedAt">): null {
-    const entry: QueuedEntry = { ...e, id: crypto.randomUUID(), queuedAt: new Date().toISOString() };
+    const entry: QueuedEntry = { ...e, id: crypto.randomUUID(), queuedAt: new Date().toISOString(), ownerEmail: state?.email ?? undefined };
     const q = [...readQueue(), entry];
     writeQueue(q);
     patch({ queue: q });
@@ -243,7 +265,9 @@ export const actions = {
       on the device with its error message for the kader to resolve. */
   async syncQueue(): Promise<{ sent: number; failed: number }> {
     let sent = 0, failed = 0;
+    const me = get().email;
     for (const entry of readQueue()) {
+      if (entry.ownerEmail && me && entry.ownerEmail !== me) continue; // belongs to another kader on this shared device
       try {
         if (entry.isNewChild) {
           const { data: existing } = await supabase.from("children").select("id").eq("id", entry.childId).maybeSingle();

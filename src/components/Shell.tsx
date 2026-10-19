@@ -44,24 +44,30 @@ function SyncBar() {
   const confirm = useConfirm();
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState(false);
-  if (!s || !s.userId || s.queue.length === 0) return null;
-  const errs = s.queue.filter((q) => q.error).length;
+  if (!s || !s.userId) return null;
+  // On a shared phone only the signed-in kader's own pending entries are shown and sent;
+  // entries made under another account stay on the device, hidden, until that account logs in.
+  const own = s.queue.filter((q) => !q.ownerEmail || q.ownerEmail === s.email);
+  const others = s.queue.length - own.length;
+  if (own.length === 0 && others === 0) return null;
+  const errs = own.filter((q) => q.error).length;
   return (
     <div className="no-print fixed inset-x-4 bottom-[84px] z-30 md:inset-x-auto md:bottom-6 md:right-8 md:w-[26rem]">
       <div className="card border-2 border-sun p-3 shadow-lg">
         <div className="flex items-center gap-3">
-          <span className="min-w-0 flex-1 text-sm font-bold">{s.queue.length} catatan menunggu dikirim{errs > 0 ? ` (${errs} perlu diperbaiki)` : ""}</span>
-          <button className="btn btn-ghost !min-h-10 shrink-0 px-3 text-sm" onClick={() => setOpen(!open)} aria-expanded={open}>{open ? "Tutup" : "Lihat"}</button>
-          <button className="btn btn-primary !min-h-10 shrink-0 px-3 text-sm" disabled={!online || busy}
+          <span className="min-w-0 flex-1 text-sm font-bold">{own.length > 0 ? `${own.length} catatan menunggu dikirim${errs > 0 ? ` (${errs} perlu diperbaiki)` : ""}` : `${others} catatan milik akun lain tersimpan di perangkat ini`}</span>
+          {own.length > 0 && <button className="btn btn-ghost !min-h-10 shrink-0 px-3 text-sm" onClick={() => setOpen(!open)} aria-expanded={open}>{open ? "Tutup" : "Lihat"}</button>}
+          {own.length > 0 && <button className="btn btn-primary !min-h-10 shrink-0 px-3 text-sm" disabled={!online || busy}
             onClick={async () => { setBusy(true); await actions.syncQueue(); setBusy(false); }}>
             {busy ? "Mengirim..." : online ? "Kirim sekarang" : "Offline"}
-          </button>
+          </button>}
         </div>
         {open && (
           <div className="mt-2 border-t border-line pt-2">
             <p className="mb-2 text-xs text-mute">Ditimbang saat tidak ada sinyal. Tersimpan sementara di perangkat ini dan dikirim otomatis begitu ada sinyal. Tidak ada yang ditimpa: kalau server menolak, catatan tetap di sini.</p>
             <ul className="max-h-48 space-y-2 overflow-y-auto">
-              {s.queue.map((q) => (
+              {others > 0 && <li className="rounded-lg bg-paper p-2 text-xs text-mute">{others} catatan milik akun lain tersimpan di perangkat ini. Masuk dengan akun yang membuatnya untuk melihat dan mengirimnya.</li>}
+              {own.map((q) => (
                 <li key={q.id} className="flex items-center gap-2 rounded-lg bg-bg p-2 text-sm">
                   <span className="min-w-0 flex-1">
                     <b>{q.childName}</b>{q.isNewChild ? " (anak baru)" : ""} · {q.date} · {String(q.weight).replace(".", ",")} kg
