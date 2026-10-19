@@ -129,3 +129,21 @@ body {
 .sk::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.65), transparent); animation: sk-shimmer 1.4s ease-in-out infinite; }
 @keyframes sk-shimmer { to { transform: translateX(100%); } }
 @media (prefers-reduced-motion: reduce) { .sk::after { animation: none; } }
+
+/* print template for the monthly report: A4 landscape, page numbers, no clipped tables */
+@page { size: A4 landscape; margin: 12mm 12mm 16mm; @bottom-center { content: "SINDAPARKA - RAHASIA - Halaman " counter(page) " dari " counter(pages); font-size: 8pt; color: #5f6b7a; } }
+@media print {
+  .print-doc { display: block !important; color: #111827; font-size: 9pt; }
+  .print-doc table { width: 100%; border-collapse: collapse; }
+  .print-doc th, .print-doc td { border: 0.5pt solid #9aa5b4; padding: 2pt 4pt; }
+  .print-doc td { white-space: nowrap; }
+  .print-doc td.lv-ok, .print-doc td.lv-watch, .print-doc td.lv-moderate, .print-doc td.lv-severe, .print-doc td.lv-high { white-space: normal; }
+  .print-doc th { background: #e8f0fb; text-align: center; font-weight: 700; }
+  .print-doc thead { display: table-header-group; }
+  .print-doc tr { break-inside: avoid; }
+  .print-doc .sig { break-inside: avoid; }
+  .print-doc .lv-ok { background: #d9f2e0 !important; } .print-doc .lv-watch { background: #fef3cd !important; }
+  .print-doc .lv-moderate { background: #fdebd8 !important; } .print-doc .lv-severe, .print-doc .lv-high { background: #fce4e2 !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+.print-doc { display: none; }
