@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useSyncExternalStore } from "react";
-import type { AccountStatus, Child, Immunization, Measurement, Posyandu, Profile, Puskesmas, Role } from "./types";
+import type { AccountStatus, AuditEntry, Child, Immunization, Measurement, Posyandu, Profile, Puskesmas, Role } from "./types";
 import { supabase } from "./supabase";
 import { assess } from "./who";
 import { ageInMonths } from "./age";
@@ -235,6 +235,17 @@ export const actions = {
     await refresh();
     const d = data as { children: number; measurements: number };
     return `Data uji coba dihapus: ${d.children} anak dan ${d.measurements} pengukuran.`;
+  },
+  async listAudit(before?: number): Promise<AuditEntry[]> {
+    let q = supabase.from("audit_log").select("*").order("id", { ascending: false }).limit(50);
+    if (before != null) q = q.lt("id", before);
+    const { data, error } = await q;
+    if (error) throw error;
+    return (data ?? []).map((r) => ({
+      id: r.id as number, at: r.at as string, actor: (r.actor as string) ?? null,
+      action: r.action as AuditEntry["action"], table: r.table_name as string, rowId: (r.row_id as string) ?? null,
+      oldData: (r.old_data as Record<string, unknown>) ?? null, newData: (r.new_data as Record<string, unknown>) ?? null,
+    }));
   },
   async addPuskesmas(name: string): Promise<string | null> {
     const { error } = await supabase.from("puskesmas").insert({ name: name.trim() });

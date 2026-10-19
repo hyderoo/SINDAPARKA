@@ -50,3 +50,14 @@ export interface Profile {
   posyanduId: string | null;
   createdAt: string;
 }
+
+export interface AuditEntry {
+  id: number;
+  at: string; // ISO timestamptz
+  actor: string | null; // auth user id
+  action: "INSERT" | "UPDATE" | "DELETE";
+  table: string; // children | measurements | immunizations
+  rowId: string | null;
+  oldData: Record<string, unknown> | null;
+  newData: Record<string, unknown> | null;
+}

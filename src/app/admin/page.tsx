@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { actions, useStore } from "@/lib/store";
 import type { AccountStatus, Posyandu, Profile, Role } from "@/lib/types";
@@ -114,6 +115,10 @@ export default function Admin() {
   return (
     <div className="space-y-6">
       <h1 className="font-display text-3xl font-semibold">Admin</h1>
+      <Link href="/admin/audit" className="card flex min-h-14 items-center justify-between p-4 font-bold">
+        <span>Catatan perubahan data (audit)</span>
+        <span className="text-mute" aria-hidden>&rarr;</span>
+      </Link>
       <section className="card space-y-3 p-5">
         <h2 className="font-display text-xl font-semibold">Puskesmas dan posyandu</h2>
         <p className="text-sm text-mute">Tambahkan dulu puskesmas, lalu posyandu di bawahnya. Gunakan nama resmi.</p>
