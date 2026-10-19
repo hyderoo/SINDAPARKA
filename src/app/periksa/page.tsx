@@ -3,7 +3,7 @@ import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useScope } from "@/lib/scope";
 import { actions } from "@/lib/store";
-import { ageInMonths, fmtAge, todayISO } from "@/lib/age";
+import { ageInMonths, fmtAge, fmtDate, todayISO } from "@/lib/age";
 import { assess, plausible, type Sex } from "@/lib/who";
 import { Result } from "@/components/Result";
 
@@ -26,6 +26,7 @@ function Form() {
   const [posId, setPosId] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [dupAckFor, setDupAckFor] = useState<string | null>(null);
   const [posture, setPosture] = useState<"auto" | "lying" | "standing">("auto");
 
   const resRef = useRef<HTMLElement>(null);
@@ -51,12 +52,15 @@ function Form() {
   const lying = posture === "auto" ? (age != null ? age <= 24 : true) : posture === "lying";
   const a = useMemo(() => (eSex && age != null && numsOk && !warn ? assess(eSex, age, wn, hn, lying) : null), [eSex, age, numsOk, warn, wn, hn, lying]);
   const matches = useMemo(() => (sc ? sc.children.filter((c) => c.name.toLowerCase().includes(q.toLowerCase())).slice(0, 6) : []), [sc, q]);
+  const dup = !isNew && child && sc ? sc.measurements.filter((m) => m.childId === child.id && m.date === date) : [];
+  const dupSig = `${childId}|${date}`;
   if (!sc) return null;
 
   const ownPosId = sc.s.role === "kader" ? sc.s.posyanduId ?? "" : posId || sc.s.posyanduList[0]?.id || "";
   const canSave = !!a && (isNew ? name.trim().length > 1 && !!birth && birth <= date && consent && !!ownPosId : !!child);
   const save = async () => {
     if (!a || busy) return;
+    if (dup.length > 0 && dupAckFor !== dupSig) { setDupAckFor(dupSig); return; }
     setBusy(true);
     setErr(null);
     let id = childId;
@@ -133,6 +137,12 @@ function Form() {
         </div>
         <div><label className="label" htmlFor="tg">Tanggal ukur</label><input id="tg" type="date" className="field" value={date} max={todayISO()} onChange={(e) => setDate(e.target.value)} /></div>
         {age != null && <p className="text-sm text-mute">Usia saat diukur: <b className="text-ink">{fmtAge(age)}</b> ({age} bulan). </p>}
+        {dup.length > 0 && (
+          <p role="alert" className="rounded-xl bg-[#FDF3E0] p-3 text-sm font-semibold text-[#9A6B00]">
+            {child!.name} sudah ditimbang pada {fmtDate(date)} ({dup.map((m) => `${String(m.weight).replace(".", ",")} kg, ${String(m.height).replace(".", ",")} cm`).join(" dan ")}).
+            Menyimpan akan menambah catatan kedua di hari yang sama. Kalau ini koreksi, hapus dulu catatan sebelumnya di halaman anak.
+          </p>
+        )}
         {age != null && age > 60 && <p className="rounded-xl bg-berry-soft p-3 text-sm font-semibold text-berry">Usia di atas 60 bulan, di luar cakupan standar balita.</p>}
         {warn && <p className="rounded-xl bg-berry-soft p-3 text-sm font-semibold text-berry">{warn}</p>}
       </section>
@@ -142,7 +152,7 @@ function Form() {
         {a && age != null ? (
           <>
             <Result a={a} age={age} />
-            <button className="btn btn-primary mt-5 w-full" disabled={!canSave || saved || busy} onClick={save}>{saved ? "Tersimpan ✓" : busy ? "Menyimpan..." : "Simpan penimbangan"}</button>
+            <button className="btn btn-primary mt-5 w-full" disabled={!canSave || saved || busy} onClick={save}>{saved ? "Tersimpan ✓" : busy ? "Menyimpan..." : dup.length > 0 && dupAckFor !== dupSig ? "Tetap simpan (pengukuran kedua)" : "Simpan penimbangan"}</button>
             {err && <p role="alert" className="mt-3 rounded-xl bg-berry-soft p-3 text-sm font-semibold text-berry">{err}</p>}
           </>
         ) : (
