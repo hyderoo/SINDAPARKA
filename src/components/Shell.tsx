@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { actions, useOnline, useStore } from "@/lib/store";
 import { t, type Key } from "@/lib/i18n";
 import { LoadError, PageSkeleton } from "@/components/Skeleton";
@@ -33,6 +33,44 @@ export function Logo({ size = 36 }: { size?: number }) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/logos/undip.png" width={381} height={446} alt="" style={{ height: h, width: "auto" }} />
     </span>
+  );
+}
+
+function AccountMenu() {
+  const s = useStore();
+  const router = useRouter();
+  const path = usePathname();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => setOpen(false), [path]);
+  useEffect(() => {
+    if (!open) return;
+    const down = (e: MouseEvent | TouchEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", down);
+    document.addEventListener("touchstart", down);
+    document.addEventListener("keydown", key);
+    return () => { document.removeEventListener("mousedown", down); document.removeEventListener("touchstart", down); document.removeEventListener("keydown", key); };
+  }, [open]);
+  if (!s) return null;
+  const who = s.fullName || s.email || "Akun";
+  const role = s.role === "admin" ? "Admin" : s.role === "nakes" ? "Tenaga kesehatan" : `Kader ${s.posyandu}`;
+  return (
+    <div ref={ref} className="relative md:hidden">
+      <button aria-haspopup="menu" aria-expanded={open} aria-label="Menu akun" onClick={() => setOpen(!open)} className="flex h-11 min-w-11 items-center justify-center gap-1 rounded-full border border-line bg-white px-3 font-bold">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-leaf-soft font-display text-sm text-leaf-deep">{who[0]?.toUpperCase()}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden><path d="M6 9l6 6 6-6" /></svg>
+      </button>
+      {open && (
+        <div role="menu" className="absolute right-0 z-30 mt-2 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-line bg-white shadow-lg">
+          <div className="border-b border-line p-3"><div className="truncate font-bold">{who}</div><div className="truncate text-xs text-mute">{role}</div></div>
+          {s.role === "admin" && <Link role="menuitem" href="/admin" className="flex min-h-12 items-center px-3 text-sm font-bold">Kelola akun (Admin)</Link>}
+          <Link role="menuitem" href="/metode" className="flex min-h-12 items-center px-3 text-sm font-bold">Cara hitung dan batasannya</Link>
+          <Link role="menuitem" href="/privasi" className="flex min-h-12 items-center px-3 text-sm font-bold">Privasi data anak</Link>
+          <button role="menuitem" className="flex min-h-12 w-full items-center border-t border-line px-3 text-left text-sm font-bold text-berry" onClick={async () => { await actions.signOut(); router.push("/masuk"); }}>Keluar</button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -89,20 +127,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="min-w-0 flex-1 pb-28 md:pb-10">
-        <div className="no-print flex flex-wrap items-center gap-2 px-4 pt-3 text-xs md:px-8">
-          <Link href="/dashboard" className="flex items-center gap-2 md:hidden"><Logo size={28} /><span className="font-display text-base font-bold">SINDAPARKA</span></Link>
-          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+        <div className="no-print flex items-center gap-2 px-4 pt-3 text-xs md:justify-end md:px-8">
+          <Link href="/dashboard" className="flex min-h-11 min-w-0 items-center gap-2 md:hidden"><Logo size={26} /><span className="hidden font-display text-base font-bold min-[400px]:inline">SINDAPARKA</span></Link>
+          <div className="ml-auto flex items-center gap-2">
             {!online && <span className="chip chip-moderate">{t(lang, "offline")}</span>}
-            {s.role === "admin" && <Link href="/admin" className="chip chip-watch min-h-9 md:hidden">Admin</Link>}
-            <button className="chip min-h-9 border border-line md:hidden" onClick={async () => { await actions.signOut(); router.push("/masuk"); }}>{t(lang, "logout")}</button>
-            <div className="hidden gap-1">
-              {(["id", "en"] as const).map((l) => (
-                <button key={l} onClick={() => actions.setLang(l)} className={`min-h-9 rounded-lg px-2 text-xs font-bold uppercase ${lang === l ? "bg-ink text-white" : "border border-line text-mute"}`}>{l}</button>
-              ))}
-            </div>
+            <AccountMenu />
           </div>
         </div>
-        <div className="no-print mx-4 mt-2 text-[11px] text-mute md:mx-8">{t(lang, "demo")} <Link href="/metode" className="underline">Selengkapnya</Link></div>
+        <Link href="/metode" className="no-print mx-4 mt-1 flex min-h-11 items-center text-[11px] leading-snug text-mute md:mx-8"><span>{t(lang, "demo")} <u>Selengkapnya</u></span></Link>
         <main className="px-4 pt-4 md:px-8 md:pt-6">{s.error ? <LoadError message={s.error} onRetry={() => actions.refresh()} /> : !s.loaded ? <PageSkeleton /> : children}</main>
       </div>
 
