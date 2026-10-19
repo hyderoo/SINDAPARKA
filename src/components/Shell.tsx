@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { actions, useOnline, useStore } from "@/lib/store";
 import { t, type Key } from "@/lib/i18n";
+import { LoadError, PageSkeleton } from "@/components/Skeleton";
 
 const NAV: { href: string; k: Key; icon: string; adminOnly?: boolean }[] = [
   { href: "/dashboard", k: "nav_dashboard", icon: "M3 12l9-8 9 8M5 10v10h14V10" },
@@ -50,7 +51,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }, [s, isLanding, router]);
 
   if (isLanding) return <>{children}</>;
-  if (!s || !s.ready || !s.userId || s.status !== "active") return <div className="p-8 text-mute">Memuat...</div>;
+  if (!s || !s.ready || !s.userId || s.status !== "active") return <div className="mx-auto max-w-[1240px] p-4 md:p-8"><PageSkeleton /></div>;
   const nav = s.role === "admin" ? [...NAV, { href: "/admin", k: "nav_admin" as Key, icon: "M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z" }] : NAV;
 
   return (
@@ -98,7 +99,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
         <div className="no-print mx-4 mt-2 text-[11px] text-mute md:mx-8">{t(lang, "demo")} <Link href="/metode" className="underline">Selengkapnya</Link></div>
-        <main className="px-4 pt-4 md:px-8 md:pt-6">{children}</main>
+        <main className="px-4 pt-4 md:px-8 md:pt-6">{s.error ? <LoadError message={s.error} onRetry={() => actions.refresh()} /> : !s.loaded ? <PageSkeleton /> : children}</main>
       </div>
 
       <nav className="no-print fixed inset-x-0 bottom-0 z-20 border-t border-line bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden" aria-label="Menu utama">

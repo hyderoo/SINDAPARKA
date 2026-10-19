@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { Logo } from "@/components/Shell";
+import { Partners } from "@/components/Partners";
 
 export default function Landing() {
   const router = useRouter();
@@ -31,7 +32,8 @@ export default function Landing() {
             <li key={x} className="flex gap-2"><span className="text-leaf">✓</span>{x}</li>
           ))}
         </ul>
-        <p className="mt-6 max-w-md text-xs text-mute">Proyek tim bersama BKKBN untuk kader posyandu Parakan Kauman, Temanggung. Ini alat bantu, bukan alat diagnosis medis.</p>
+        <p className="mt-6 max-w-md text-xs text-mute">Ini alat bantu, bukan alat diagnosis medis.</p>
+        <Partners />
       </section>
 
       <section className="card rise p-6" style={{ animationDelay: "0.08s" }}>

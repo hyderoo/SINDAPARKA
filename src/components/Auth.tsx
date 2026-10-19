@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/Shell";
+import { Partners } from "@/components/Partners";
 
 export function AuthFrame({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
   return (
@@ -13,7 +14,8 @@ export function AuthFrame({ title, sub, children }: { title: string; sub?: strin
         {sub && <p className="mt-1 text-sm text-mute">{sub}</p>}
         <div className="mt-5">{children}</div>
       </div>
-      <p className="mt-4 text-center text-xs text-mute">
+      <Partners />
+      <p className="mt-6 text-center text-xs text-mute">
         <Link href="/privasi" className="underline">Privasi</Link> · <Link href="/metode" className="underline">Cara hitung dan batasannya</Link>
       </p>
     </main>

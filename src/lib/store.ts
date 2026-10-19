@@ -8,6 +8,7 @@ import { ageInMonths } from "./age";
 interface State {
   ready: boolean; // first session check done
   loading: boolean;
+  loaded: boolean; // first full data load finished
   error: string | null;
   userId: string | null;
   email: string | null;
@@ -26,7 +27,7 @@ interface State {
 // Child data is kept in memory only. It is never written to localStorage.
 const LANG_KEY = "sindaparka.lang";
 const empty = (lang: "id" | "en"): State => ({
-  ready: false, loading: false, error: null, userId: null, email: null, fullName: "", role: null, status: null,
+  ready: false, loading: false, loaded: false, error: null, userId: null, email: null, fullName: "", role: null, status: null,
   posyandu: "all", posyanduId: null, posyanduList: [], puskesmasList: [], children: [], measurements: [], lang,
 });
 let state: State | null = null;
@@ -70,23 +71,26 @@ async function fetchAll<T>(table: string, cols: string, order: string): Promise<
   return out;
 }
 
+const withTimeout = <T,>(p: PromiseLike<T>, ms = 15000): Promise<T> =>
+  Promise.race([Promise.resolve(p), new Promise<T>((_, rej) => setTimeout(() => rej(new Error("Koneksi lambat atau terputus. Periksa sinyal lalu coba lagi.")), ms))]);
+
 async function refresh() {
   const { data: sess } = await supabase.auth.getSession();
   const user = sess.session?.user;
   if (!user) { patch({ ...empty(get().lang), ready: true }); return; }
-  patch({ loading: true, error: null });
+  patch({ loading: true, loaded: false, error: null });
   try {
-    const { data: p, error: pe } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+    const { data: p, error: pe } = await withTimeout(supabase.from("profiles").select("*").eq("id", user.id).maybeSingle());
     if (pe) throw pe;
     if (!p) { patch({ ready: true, loading: false, userId: user.id, email: user.email ?? null, status: "pending", role: "kader" }); return; }
     const base = { ready: true, userId: user.id, email: user.email ?? null, fullName: p.full_name as string, role: p.role as Role, status: p.status as AccountStatus, posyanduId: p.posyandu_id as string | null };
-    if (p.status !== "active") { patch({ ...base, loading: false, children: [], measurements: [], posyanduList: [], puskesmasList: [] }); return; }
-    const [pk, pos, kids, ms] = await Promise.all([
+    if (p.status !== "active") { patch({ ...base, loading: false, loaded: true, children: [], measurements: [], posyanduList: [], puskesmasList: [] }); return; }
+    const [pk, pos, kids, ms] = await withTimeout(Promise.all([
       fetchAll<{ id: string; name: string }>("puskesmas", "id,name", "name"),
       fetchAll<{ id: string; name: string; puskesmas_id: string }>("posyandu", "id,name,puskesmas_id", "name"),
       fetchAll<Record<string, string | null>>("children", "id,name,sex,birth_date,posyandu_id,guardian_name,consent_at", "name"),
       fetchAll<Record<string, string | number | boolean | null>>("measurements", "id,child_id,measured_on,weight_kg,length_height_cm,lying,note", "measured_on"),
-    ]);
+    ]));
     const posyanduList = pos.map((x) => ({ id: x.id, name: x.name, puskesmasId: x.puskesmas_id }));
     const nameOf = new Map(posyanduList.map((x) => [x.id, x.name]));
     const children: Child[] = kids.map((k) => ({
@@ -98,11 +102,11 @@ async function refresh() {
       lying: m.lying as boolean, note: (m.note as string) ?? undefined,
     }));
     patch({
-      ...base, loading: false, posyanduList, puskesmasList: pk, children, measurements,
+      ...base, loading: false, loaded: true, posyanduList, puskesmasList: pk, children, measurements,
       posyandu: p.role === "kader" ? nameOf.get(p.posyandu_id as string) ?? "-" : "all",
     });
   } catch (e) {
-    patch({ loading: false, ready: true, error: msg(e) });
+    patch({ loading: false, loaded: true, ready: true, error: msg(e) });
   }
 }
 

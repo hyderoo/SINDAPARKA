@@ -123,3 +123,9 @@ body {
   body { background: #fff; }
   .card { box-shadow: none; }
 }
+
+/* skeleton loading */
+.sk { background: #e6eaf0; border-radius: 10px; position: relative; overflow: hidden; }
+.sk::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.65), transparent); animation: sk-shimmer 1.4s ease-in-out infinite; }
+@keyframes sk-shimmer { to { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) { .sk::after { animation: none; } }
