@@ -55,7 +55,7 @@ export function z(ind: Indicator, sex: Sex, ageMonths: number, y: number, height
   if (ind === "wfh") {
     if (heightCm == null) return null;
     key = ageMonths <= 24 ? "wfl" : "wfh";
-    x = heightCm; // tables step 0.5 cm; row() interpolates linearly between neighbours
+    x = Math.round(heightCm * 2) / 2; // tables (WHO, Permenkes lampiran) step 0.5 cm; same rounding as WHO igrowup port pygrowup
   } else {
     key = ind;
     x = ageMonths;
