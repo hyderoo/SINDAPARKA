@@ -200,7 +200,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 {/* Fixed-height icon slot keeps every label on the same baseline; the centre FAB overflows upward. */}
                 <span className="flex h-6 items-center justify-center">
                   {center ? (
-                    <span className={`flex h-12 w-12 items-center justify-center rounded-full bg-clay text-white shadow-lg ${on ? "ring-2 ring-leaf ring-offset-2 ring-offset-card" : ""}`}><Icon d={n.icon} /></span>
+                    <span className={`flex h-12 w-12 -translate-y-3 items-center justify-center rounded-full bg-clay text-white shadow-lg ${on ? "ring-2 ring-leaf ring-offset-2 ring-offset-card" : ""}`}><Icon d={n.icon} /></span>
                   ) : (
                     <Icon d={n.icon} />
                   )}
