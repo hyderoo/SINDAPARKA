@@ -1,5 +1,7 @@
 # SINDAPARKA
 
+[![CI](https://github.com/hyderoo/SINDAPARKA/actions/workflows/ci.yml/badge.svg)](https://github.com/hyderoo/SINDAPARKA/actions/workflows/ci.yml) · [Latest Playwright report](https://hyderoo.github.io/SINDAPARKA/)
+
 Growth monitoring for posyandu cadres. Record a child's weight and height, get WHO z-scores and a plain-language result straight away, and follow each child's curve over time.
 
 SINDAPARKA started as a PHP/MySQL stunting diagnosis system for posyandu cadres in Parakan Kauman, Temanggung, a team project in collaboration with BKKBN. The original code is kept on the [`legacy-php`](../../tree/legacy-php) branch. This version is a full rewrite with a new interface and new features.
