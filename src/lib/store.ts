@@ -59,7 +59,12 @@ export function useStore(): State | null {
   return s;
 }
 
-const msg = (e: unknown) => (e && typeof e === "object" && "message" in e ? String((e as { message: string }).message) : "Terjadi kesalahan.");
+const msg = (e: unknown) => {
+  const m = e && typeof e === "object" && "message" in e ? String((e as { message: string }).message) : "Terjadi kesalahan.";
+  if (m.includes("children_no_duplicate")) return "Anak dengan nama, jenis kelamin, dan tanggal lahir yang sama sudah terdaftar di posyandu ini.";
+  if (m.includes("children_consent_required")) return "Persetujuan orang tua atau wali harus dicatat.";
+  return m;
+};
 
 async function fetchAll<T>(table: string, cols: string, order: string): Promise<T[]> {
   const out: T[] = [];
