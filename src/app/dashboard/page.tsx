@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useScope } from "@/lib/scope";
 import { prevalence, priority } from "@/lib/analytics";
 import { EmptyState, StatusChip } from "@/components/ui";
-import { posLabel, fmtAge, fmtMonthYear, todayISO, addMonths } from "@/lib/age";
+import { posLabel, fmtAge, fmtDate, fmtMonthYear, todayISO, addMonths, ageInMonths, daysBetween } from "@/lib/age";
 import { t } from "@/lib/i18n";
 
 export default function Dashboard() {
@@ -14,6 +14,12 @@ export default function Dashboard() {
   const pv = prevalence(rows);
   const alerts = rows.filter((r) => priority(r) > 0).sort((a, b) => priority(b) - priority(a));
   const falling = rows.filter((r) => r.trend === "falling" && !r.last?.a.stunted).length;
+  const today2 = todayISO();
+  // Overdue: posyandu meets monthly, so a child who has not been weighed in the last 30 days (or never) needs a visit.
+  const overdue = rows
+    .map((r) => ({ r, days: r.last ? daysBetween(r.last.m.date, today2) : null }))
+    .filter((x) => x.days === null || x.days > 30)
+    .sort((a, b) => (b.days ?? 99999) - (a.days ?? 99999));
   const byPos = (s.role !== "kader" ? s.posyanduList.map((x) => x.name) : [s.posyandu]).map((p) => {
     const rr = rows.filter((r) => r.child.posyandu === p);
     return { p, ...prevalence(rr), total: rr.length };
@@ -99,9 +105,35 @@ export default function Dashboard() {
           ))}
         </ul>
       </section>
+
+      <section className="card p-5">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="font-display text-xl font-semibold">Perlu ditimbang lagi ({overdue.length})</h2>
+          <Link href="/periksa" className="btn btn-ghost !min-h-11">{t(lang, "new_measure")}</Link>
+        </div>
+        <p className="mt-1 text-xs text-mute">Anak yang belum ditimbang dalam 30 hari terakhir. Posyandu bertemu setiap bulan, jadi anak-anak ini berisiko terlewat.</p>
+        {overdue.length === 0 && <EmptyState compact icon="check" title="Semua anak sudah ditimbang bulan ini" text="Tidak ada yang terlewat. Kerja bagus." />}
+        <ul className="mt-3 divide-y divide-line">
+          {overdue.slice(0, 8).map(({ r, days }) => (
+            <li key={r.child.id}>
+              <Link href={`/anak/${r.child.id}`} className="flex min-h-16 flex-wrap items-center gap-x-3 gap-y-1 py-2">
+                <div className="min-w-0 basis-full sm:flex-1 sm:basis-0">
+                  <div className="truncate font-bold">{r.child.name}</div>
+                  <div className="text-xs text-mute">{fmtAge(ageInMonths(r.child.birth, today2))} · {posLabel(r.child.posyandu)}</div>
+                </div>
+                <span className={`chip ${days === null || days > 60 ? "chip-severe" : "chip-watch"}`}>
+                  {days === null ? "Belum pernah diukur" : `Terakhir ${fmtDate(r.last!.m.date)} (${days} hari lalu)`}
+                </span>
+              </Link>
+            </li>
+          ))}
+          {overdue.length > 8 && <li className="py-2 text-sm text-mute">dan {overdue.length - 8} anak lainnya. Lihat daftar lengkap di halaman Anak.</li>}
+        </ul>
+      </section>
     </div>
   );
 }
+
 
 function Stat({ label, value, sub, tone = "ok" }: { label: string; value: string; sub?: string; tone?: "ok" | "warn" | "bad" }) {
   const c = tone === "bad" ? "text-clay" : tone === "warn" ? "text-[#9A6B00]" : "text-leaf";
