@@ -17,9 +17,6 @@ jobs:
     permissions:
       pages: write
       id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -34,10 +31,12 @@ jobs:
           name: playwright-report
           path: results/
           retention-days: 14
+      # GitHub Pages only accepts deploys from the default branch;
+      # skip publishing on PRs (e.g. Dependabot) instead of failing.
       - uses: actions/upload-pages-artifact@v3
-        if: success()
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           path: results/html
       - uses: actions/deploy-pages@v4
-        if: success()
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         id: deployment
