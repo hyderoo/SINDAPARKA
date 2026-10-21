@@ -12,6 +12,8 @@ updates:
     groups:
       dev-dependencies:
         dependency-type: development
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -20,3 +22,6 @@ updates:
       time: "06:00"
       timezone: Asia/Jakarta
     open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns: ["*"]
