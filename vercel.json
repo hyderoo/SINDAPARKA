@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "sindaparka-rho.vercel.app"
+        }
+      ],
+      "destination": "https://sindaparka.web.id/:path*",
+      "permanent": true
+    }
+  ]
+}
