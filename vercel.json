@@ -10,6 +10,17 @@
       ],
       "destination": "https://sindaparka.web.id/:path*",
       "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "sindaparka-rho.vercel.app"
+        }
+      ],
+      "destination": "https://sindaparka.web.id",
+      "permanent": true
     }
   ]
 }
