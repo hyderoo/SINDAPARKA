@@ -313,7 +313,10 @@ export const actions = {
     return { sent, failed };
   },
   async deleteMeasurement(id: string): Promise<string | null> {
-    const { error } = await supabase.from("measurements").update({ deleted_at: new Date().toISOString() }).eq("id", id);
+    // Soft-delete goes through a SECURITY DEFINER RPC: a client UPDATE can't set
+    // deleted_at because the measurements_read SELECT policy (deleted_at is null)
+    // is checked against the new row and always rejects it (Postgres WCO_RLS_SELECT_CHECK).
+    const { error } = await supabase.rpc("soft_delete_measurement", { m: id });
     if (error) return msg(error);
     await refresh();
     return null;
