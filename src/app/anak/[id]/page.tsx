@@ -109,7 +109,7 @@ export default function Detail() {
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="font-bold">{fmtDate(p.m.date)}</span>
                 <span className="text-xs text-mute">{fmtAge(p.age)}</span>
-                <button className="ml-auto min-h-11 px-3 text-xs font-bold text-berry underline" onClick={async () => { if (await confirm({ title: "Hapus penimbangan ini?", detail: `${fmtDate(p.m.date)} · ${p.m.weight.toString().replace(".", ",")} kg · ${p.m.height.toString().replace(".", ",")} cm · z TB/U ${zfmt(p.a.hfa)}`, body: "Catatan penimbangan ini dihapus permanen dari riwayat anak dan tidak bisa dikembalikan.", confirmLabel: "Hapus penimbangan", destructive: true })) actions.deleteMeasurement(p.m.id); }}>Hapus</button>
+                <button className="ml-auto min-h-11 px-3 text-xs font-bold text-berry underline" onClick={async () => { if (await confirm({ title: "Hapus penimbangan ini?", detail: `${fmtDate(p.m.date)} · ${p.m.weight.toString().replace(".", ",")} kg · ${p.m.height.toString().replace(".", ",")} cm · z TB/U ${zfmt(p.a.hfa)}`, body: "Catatan penimbangan ini dihapus dari riwayat anak dan tidak bisa dikembalikan lewat aplikasi.", confirmLabel: "Hapus penimbangan", destructive: true })) actions.deleteMeasurement(p.m.id); }}>Hapus</button>
               </div>
               <div className="text-sm tabular-nums">{p.m.weight.toString().replace(".", ",")} kg · {p.m.height.toString().replace(".", ",")} cm · z TB/U {zfmt(p.a.hfa)}</div>
               <div className="mt-1"><StatusChip s={p.a.sHfa} /></div>
